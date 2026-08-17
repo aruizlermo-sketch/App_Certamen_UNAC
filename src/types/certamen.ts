@@ -1,0 +1,93 @@
+export type ConcursoEstado = "borrador" | "activo" | "cerrado";
+export type UserRol = "admin" | "jurado";
+
+export type Concurso = {
+  id: string;
+  nombre: string;
+  descripcion: string | null;
+  escalaMin: number;
+  escalaMax: number;
+  estado: ConcursoEstado;
+};
+
+export type Categoria = {
+  id: string;
+  concursoId: string;
+  nombre: string;
+  descripcion: string | null;
+  pesoTotal: number;
+  orden: number;
+};
+
+export type CategoriaCriterio = {
+  id: string;
+  categoriaId: string;
+  nombre: string;
+  descripcion: string | null;
+  peso: number;
+  orden: number;
+};
+
+export type Participante = {
+  id: string;
+  concursoId: string;
+  nombre: string;
+  orden: number;
+};
+
+export type Jurado = {
+  id: string;
+  concursoId: string;
+  nombre: string;
+  userId: string | null;
+  activo: boolean;
+};
+
+export type Calificacion = {
+  id: string;
+  juradoId: string;
+  participanteId: string;
+  categoriaCriterioId: string;
+  puntaje: number;
+};
+
+export type CategoriaConCriterios = Categoria & {
+  criterios: CategoriaCriterio[];
+  jurados: Jurado[];
+};
+
+export type ConcursoCompleto = Concurso & {
+  categorias: CategoriaConCriterios[];
+  participantes: Participante[];
+  jurados: Jurado[];
+};
+
+export type PuntajeParticipanteCategoria = {
+  participanteId: string;
+  participanteNombre: string;
+  puntaje: number;
+  desglose: { criterioId: string; criterioNombre: string; promedio: number; peso: number; contribucion: number }[];
+};
+
+export type RankingCategoria = {
+  categoria: Categoria;
+  ranking: PuntajeParticipanteCategoria[];
+  ganador: PuntajeParticipanteCategoria | null;
+};
+
+export type PuntajeTotalParticipante = {
+  participanteId: string;
+  participanteNombre: string;
+  puntajeTotal: number;
+  porCategoria: { categoriaId: string; categoriaNombre: string; puntaje: number; peso: number; contribucion: number }[];
+};
+
+export type ResultadosConcurso = {
+  concurso: Concurso;
+  rankingGeneral: PuntajeTotalParticipante[];
+  porCategoria: RankingCategoria[];
+};
+
+export type ActionResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
