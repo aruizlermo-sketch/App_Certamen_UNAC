@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { saveScoreAction } from "@/app/jurado/actions";
+import { saveScoresAction } from "@/app/jurado/actions";
 import type {
   Calificacion,
   CategoriaConCriterios,
@@ -42,6 +43,22 @@ function buildScoreOptions(min: number, max: number): string[] {
   return options;
 }
 
+function buildDraftFromSaved(
+  categoria: CategoriaConCriterios,
+  calificaciones: Calificacion[],
+  juradoId: string,
+  participanteId: string,
+): Record<string, string> {
+  const draft: Record<string, string> = {};
+  for (const crit of categoria.criterios) {
+    const saved = getScore(calificaciones, juradoId, participanteId, crit.id);
+    if (saved) {
+      draft[crit.id] = saved;
+    }
+  }
+  return draft;
+}
+
 export function ScoringForm({
   concurso,
   categoria,
@@ -52,32 +69,73 @@ export function ScoringForm({
 }: ScoringFormProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [draftScores, setDraftScores] = useState<Record<string, string>>({});
+  const [feedback, setFeedback] = useState<{
+    type: "ok" | "error";
+    text: string;
+  } | null>(null);
 
   const scoreOptions = buildScoreOptions(concurso.escalaMin, concurso.escalaMax);
 
+  useEffect(() => {
+    setDraftScores(
+      buildDraftFromSaved(
+        categoria,
+        calificaciones,
+        juradoId,
+        participante.id,
+      ),
+    );
+    setFeedback(null);
+  }, [
+    categoria,
+    calificaciones,
+    juradoId,
+    participante.id,
+  ]);
+
   const criteriosCompletados = categoria.criterios.filter(
-    (crit) =>
-      getScore(calificaciones, juradoId, participante.id, crit.id) !== "",
+    (crit) => draftScores[crit.id],
   ).length;
 
-  function handleSave(criterioId: string, value: string) {
-    if (!value) return;
-    const puntaje = Number(value);
-    if (Number.isNaN(puntaje)) return;
+  const hasSelection = criteriosCompletados > 0;
 
-    const fd = new FormData();
-    fd.set("juradoId", juradoId);
-    fd.set("participanteId", participante.id);
-    fd.set("categoriaCriterioId", criterioId);
-    fd.set("puntaje", String(puntaje));
-    fd.set("escalaMin", String(concurso.escalaMin));
-    fd.set("escalaMax", String(concurso.escalaMax));
+  function handleSelectScore(criterioId: string, value: string) {
+    setDraftScores((prev) => ({ ...prev, [criterioId]: value }));
+    setFeedback(null);
+  }
+
+  function handleSaveAll() {
+    const scores = categoria.criterios
+      .filter((crit) => draftScores[crit.id])
+      .map((crit) => ({
+        categoriaCriterioId: crit.id,
+        puntaje: Number(draftScores[crit.id]),
+      }));
+
+    if (scores.length === 0) {
+      setFeedback({
+        type: "error",
+        text: "Selecciona al menos una nota antes de guardar.",
+      });
+      return;
+    }
 
     startTransition(async () => {
-      const result = await saveScoreAction(fd);
+      const result = await saveScoresAction({
+        juradoId,
+        participanteId: participante.id,
+        scores,
+        escalaMin: concurso.escalaMin,
+        escalaMax: concurso.escalaMax,
+      });
+
       if (result.ok) {
+        setFeedback({ type: "ok", text: "Calificaciones guardadas correctamente." });
         router.refresh();
         onSaved?.();
+      } else {
+        setFeedback({ type: "error", text: result.error });
       }
     });
   }
@@ -96,20 +154,12 @@ export function ScoringForm({
           <span className="status-pill bg-blue-soft text-unac-blue">
             {criteriosCompletados}/{categoria.criterios.length} criterios
           </span>
-          {pending ? (
-            <span className="status-pill bg-brand-soft text-text">Guardando...</span>
-          ) : null}
         </div>
       </div>
 
       <div className="space-y-3">
         {categoria.criterios.map((crit) => {
-          const current = getScore(
-            calificaciones,
-            juradoId,
-            participante.id,
-            crit.id,
-          );
+          const current = draftScores[crit.id] ?? "";
 
           return (
             <div
@@ -137,7 +187,7 @@ export function ScoringForm({
                       <button
                         key={opt}
                         type="button"
-                        onClick={() => handleSave(crit.id, opt)}
+                        onClick={() => handleSelectScore(crit.id, opt)}
                         disabled={pending}
                         className={
                           current === opt
@@ -154,6 +204,34 @@ export function ScoringForm({
             </div>
           );
         })}
+      </div>
+
+      {feedback ? (
+        <p
+          className={`rounded-xl px-3 py-2 text-sm ${
+            feedback.type === "ok"
+              ? "bg-green-soft text-green"
+              : "bg-coral-soft text-coral"
+          }`}
+        >
+          {feedback.text}
+        </p>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+        <p className="text-sm text-text-muted">
+          {hasSelection
+            ? "Revisa las notas y pulsa Guardar para confirmar."
+            : "Selecciona las notas de cada criterio."}
+        </p>
+        <button
+          type="button"
+          onClick={handleSaveAll}
+          disabled={pending || !hasSelection}
+          className="btn-primary min-w-[140px]"
+        >
+          {pending ? "Guardando..." : "Guardar"}
+        </button>
       </div>
     </div>
   );
