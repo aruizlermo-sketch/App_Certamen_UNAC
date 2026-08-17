@@ -38,8 +38,9 @@ export async function updateSession(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
   const isLogin = pathname === "/login";
+  const isAuthCallback = pathname.startsWith("/auth/callback");
 
-  if (!user && !isLogin) {
+  if (!user && !isLogin && !isAuthCallback) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
