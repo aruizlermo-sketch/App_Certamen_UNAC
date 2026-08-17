@@ -120,6 +120,22 @@ body {
     box-shadow: 0 0 0 2px rgb(39 108 170 / 0.15);
   }
 
+  .btn-choice {
+    @apply rounded-md border border-border bg-white px-3 py-2.5 text-left text-sm font-medium text-text transition hover:border-unac-blue hover:bg-blue-soft;
+  }
+
+  .btn-choice-active {
+    @apply border-unac-blue bg-blue-soft font-semibold text-unac-blue ring-2 ring-unac-blue/15;
+  }
+
+  .btn-score {
+    @apply min-w-[2.75rem] rounded-md border border-border bg-white px-2 py-2 text-sm font-semibold text-text transition hover:border-unac-blue hover:bg-blue-soft disabled:opacity-50;
+  }
+
+  .btn-score-active {
+    @apply border-unac-gold bg-brand-soft text-unac-navy-dark ring-2 ring-unac-gold/30;
+  }
+
   .card-panel {
     @apply rounded-lg border border-border bg-card shadow-[0_4px_16px_rgba(7,41,77,0.06)];
   }

@@ -128,23 +128,27 @@ export function ScoringForm({
                     Peso: {(crit.peso * 100).toFixed(0)}%
                   </p>
                 </div>
-                <div className="w-full sm:w-40">
-                  <label htmlFor={`score-${crit.id}`} className="text-caption">
+                <div className="w-full">
+                  <p className="text-caption">
                     Nota ({concurso.escalaMin}–{concurso.escalaMax})
-                  </label>
-                  <select
-                    id={`score-${crit.id}`}
-                    value={current}
-                    onChange={(e) => handleSave(crit.id, e.target.value)}
-                    className="combobox mt-1"
-                  >
-                    <option value="">— Nota —</option>
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
                     {scoreOptions.map((opt) => (
-                      <option key={opt} value={opt}>
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => handleSave(crit.id, opt)}
+                        disabled={pending}
+                        className={
+                          current === opt
+                            ? "btn-score btn-score-active"
+                            : "btn-score"
+                        }
+                      >
                         {opt}
-                      </option>
+                      </button>
                     ))}
-                  </select>
+                  </div>
                 </div>
               </div>
             </div>

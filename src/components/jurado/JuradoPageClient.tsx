@@ -13,6 +13,10 @@ type JuradoPageClientProps = {
   demoMode?: boolean;
 };
 
+function choiceClass(active: boolean) {
+  return active ? "btn-choice btn-choice-active" : "btn-choice";
+}
+
 export function JuradoPageClient({
   concurso,
   calificaciones: initialCalificaciones,
@@ -59,53 +63,46 @@ export function JuradoPageClient({
         </p>
       </div>
 
-      <div className="card-panel p-5">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div>
-            <label htmlFor="participante-select" className="text-label">
-              1. Tuna participante
-            </label>
-            <select
-              id="participante-select"
-              value={participanteId}
-              onChange={(e) => {
-                setParticipanteId(e.target.value);
-                setCategoriaId("");
-              }}
-              className="combobox mt-2"
-            >
-              <option value="">— Selecciona una tuna —</option>
-              {concurso.participantes.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nombre}
-                </option>
-              ))}
-            </select>
+      <div className="card-panel space-y-6 p-5">
+        <div>
+          <p className="text-label">1. Tuna participante</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {concurso.participantes.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  setParticipanteId(p.id);
+                  setCategoriaId("");
+                }}
+                className={choiceClass(participanteId === p.id)}
+              >
+                {p.nombre}
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div>
-            <label htmlFor="categoria-select" className="text-label">
-              2. Categoria
-            </label>
-            <select
-              id="categoria-select"
-              value={categoriaId}
-              onChange={(e) => setCategoriaId(e.target.value)}
-              disabled={!participanteId}
-              className="combobox mt-2 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="">
-                {participanteId
-                  ? "— Selecciona una categoria —"
-                  : "— Primero elige una tuna —"}
-              </option>
+        <div>
+          <p className="text-label">2. Categoria</p>
+          {!participanteId ? (
+            <p className="mt-2 text-sm text-text-muted">
+              Primero elige una tuna participante.
+            </p>
+          ) : (
+            <div className="mt-3 flex flex-wrap gap-2">
               {categoriasAsignadas.map((cat) => (
-                <option key={cat.id} value={cat.id}>
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCategoriaId(cat.id)}
+                  className={choiceClass(categoriaId === cat.id)}
+                >
                   {cat.nombre}
-                </option>
+                </button>
               ))}
-            </select>
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
