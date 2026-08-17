@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { JuradoPageClient } from "@/components/jurado/JuradoPageClient";
 import { JuradoSelector } from "@/components/jurado/JuradoSelector";
 import { requireJurado } from "@/lib/auth/session";
@@ -22,7 +21,16 @@ export default async function JuradoPage() {
   }
 
   if (session.rol === "admin") {
-    redirect("/");
+    const calificaciones = await getCalificaciones(concurso.id);
+
+    return (
+      <JuradoSelector
+        concurso={concurso}
+        jurados={concurso.jurados}
+        calificaciones={calificaciones}
+        adminMode
+      />
+    );
   }
 
   if (!session.juradoId) {

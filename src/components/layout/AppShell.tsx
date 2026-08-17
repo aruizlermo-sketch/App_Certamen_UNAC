@@ -46,6 +46,7 @@ const adminNavGroups: NavGroup[] = [
     title: "Concurso",
     items: [
       { href: "/admin", label: "Configuracion", icon: <IconClipboard className="h-4 w-4" /> },
+      { href: "/jurado", label: "Calificar", icon: <IconStar className="h-4 w-4" /> },
       { href: "/resultados", label: "Resultados", icon: <IconTrophy className="h-4 w-4" /> },
     ],
   },

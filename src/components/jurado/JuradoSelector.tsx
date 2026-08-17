@@ -2,50 +2,75 @@
 
 import { useState } from "react";
 import { JuradoPageClient } from "@/components/jurado/JuradoPageClient";
-import type { ConcursoCompleto, Jurado } from "@/types/certamen";
+import type { Calificacion, ConcursoCompleto, Jurado } from "@/types/certamen";
 
 type JuradoSelectorProps = {
   concurso: ConcursoCompleto;
   jurados: Jurado[];
+  calificaciones?: Calificacion[];
+  adminMode?: boolean;
 };
 
-export function JuradoSelector({ concurso, jurados }: JuradoSelectorProps) {
+function choiceClass(active: boolean) {
+  return active ? "btn-choice btn-choice-active" : "btn-choice";
+}
+
+export function JuradoSelector({
+  concurso,
+  jurados,
+  calificaciones = [],
+  adminMode = false,
+}: JuradoSelectorProps) {
   const [juradoId, setJuradoId] = useState(jurados[0]?.id ?? "");
 
   const jurado = jurados.find((j) => j.id === juradoId);
+  const demoMode = !adminMode;
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-unac-navy">
-        <strong>Modo demo:</strong> simula un jurado. En produccion cada
-        jurado solo ve y edita sus propias notas.
+      <div
+        className={`rounded-xl px-4 py-3 text-sm ${
+          adminMode
+            ? "border border-blue-soft bg-blue-soft text-unac-navy"
+            : "border border-amber-soft bg-amber-soft text-amber-900"
+        }`}
+      >
+        {adminMode ? (
+          <>
+            <strong>Vista general:</strong> selecciona un jurado para ver o
+            editar sus calificaciones.
+          </>
+        ) : (
+          <>
+            <strong>Modo demo:</strong> simula un jurado. En produccion cada
+            jurado solo ve y edita sus propias notas.
+          </>
+        )}
       </div>
 
       <div>
-        <label htmlFor="jurado-select" className="text-label">
-          Simular jurado
-        </label>
-        <select
-          id="jurado-select"
-          value={juradoId}
-          onChange={(e) => setJuradoId(e.target.value)}
-          className="combobox mt-1.5 max-w-md"
-        >
+        <p className="text-label">Jurado</p>
+        <div className="mt-3 flex flex-wrap gap-2">
           {jurados.map((j) => (
-            <option key={j.id} value={j.id}>
+            <button
+              key={j.id}
+              type="button"
+              onClick={() => setJuradoId(j.id)}
+              className={choiceClass(juradoId === j.id)}
+            >
               {j.nombre}
-            </option>
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       {jurado ? (
         <JuradoPageClient
           concurso={concurso}
-          calificaciones={[]}
+          calificaciones={calificaciones}
           juradoId={jurado.id}
           juradoNombre={jurado.nombre}
-          demoMode
+          demoMode={demoMode}
         />
       ) : null}
     </div>

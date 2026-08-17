@@ -68,6 +68,9 @@ export default async function HomePage() {
             <Link href="/resultados" className="btn-primary">
               Ver resultados
             </Link>
+            <Link href="/jurado" className="btn-secondary">
+              Calificar
+            </Link>
             <Link href="/admin" className="btn-secondary">
               Configuracion
             </Link>
