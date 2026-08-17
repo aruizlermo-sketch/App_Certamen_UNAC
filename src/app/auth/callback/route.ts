@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAppSession } from "@/lib/auth/session";
+import { linkUserByEmail } from "@/lib/auth/link-account";
 import { createServerClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -16,6 +17,14 @@ export async function GET(request: Request) {
 
   if (error) {
     return NextResponse.redirect(`${origin}/login?error=auth`);
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    await linkUserByEmail(user.id, user.email);
   }
 
   const session = await getAppSession();

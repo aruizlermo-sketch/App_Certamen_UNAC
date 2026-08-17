@@ -39,6 +39,7 @@ export type Jurado = {
   id: string;
   concursoId: string;
   nombre: string;
+  email: string | null;
   userId: string | null;
   activo: boolean;
 };
@@ -86,6 +87,11 @@ export type ResultadosConcurso = {
   concurso: Concurso;
   rankingGeneral: PuntajeTotalParticipante[];
   porCategoria: RankingCategoria[];
+};
+
+export type AdminInvite = {
+  email: string;
+  nombre: string;
 };
 
 export type ActionResult<T> =

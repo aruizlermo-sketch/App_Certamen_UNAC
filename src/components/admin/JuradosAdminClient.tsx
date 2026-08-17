@@ -17,6 +17,7 @@ type JuradosAdminClientProps = {
 
 type FormState = {
   nombre: string;
+  email: string;
   activo: boolean;
   categoriaIds: string[];
 };
@@ -35,6 +36,7 @@ export function JuradosAdminClient({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>({
     nombre: "",
+    email: "",
     activo: true,
     categoriaIds: [],
   });
@@ -42,7 +44,7 @@ export function JuradosAdminClient({
 
   function resetForm() {
     setEditingId(null);
-    setForm({ nombre: "", activo: true, categoriaIds: [] });
+    setForm({ nombre: "", email: "", activo: true, categoriaIds: [] });
     setError(null);
   }
 
@@ -51,6 +53,7 @@ export function JuradosAdminClient({
     setEditingId(j.id);
     setForm({
       nombre: j.nombre,
+      email: j.email ?? "",
       activo: j.activo,
       categoriaIds: cat.map((c) => c.id),
     });
@@ -69,6 +72,7 @@ export function JuradosAdminClient({
   function buildFormData(): FormData {
     const fd = new FormData();
     fd.set("nombre", form.nombre);
+    fd.set("email", form.email);
     fd.set("activo", form.activo ? "true" : "false");
     for (const id of form.categoriaIds) {
       fd.append("categoriaIds", id);
@@ -127,6 +131,22 @@ export function JuradosAdminClient({
             className="input-field mt-1.5"
           />
         </div>
+        <div>
+          <label htmlFor="jur-email" className="text-label">
+            Email de acceso
+          </label>
+          <input
+            id="jur-email"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+            className="input-field mt-1.5"
+            placeholder="jurado@unac.edu.pe"
+          />
+          <p className="mt-1 text-xs text-text-muted">
+            Al iniciar sesion con este correo, se vincula automaticamente al jurado.
+          </p>
+        </div>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -179,13 +199,25 @@ export function JuradosAdminClient({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-base font-bold">{j.nombre}</h3>
-                  <span
-                    className={`status-pill mt-2 ${
-                      j.activo ? "bg-green-soft text-green" : "bg-coral-soft text-coral"
-                    }`}
-                  >
-                    {j.activo ? "Activo" : "Inactivo"}
-                  </span>
+                  {j.email ? (
+                    <p className="mt-1 text-sm text-text-muted">{j.email}</p>
+                  ) : null}
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span
+                      className={`status-pill ${
+                        j.activo ? "bg-green-soft text-green" : "bg-coral-soft text-coral"
+                      }`}
+                    >
+                      {j.activo ? "Activo" : "Inactivo"}
+                    </span>
+                    <span
+                      className={`status-pill ${
+                        j.userId ? "bg-blue-soft text-unac-blue" : "bg-page-bg text-text-muted"
+                      }`}
+                    >
+                      {j.userId ? "Cuenta vinculada" : "Sin vincular"}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button

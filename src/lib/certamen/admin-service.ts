@@ -117,12 +117,14 @@ async function syncJuradoCategorias(juradoId: string, categoriaIds: string[]) {
 export async function createJurado(input: {
   concursoId: string;
   nombre: string;
+  email: string | null;
   activo: boolean;
   categoriaIds: string[];
 }): Promise<Result> {
   const denied = await assertAdmin();
   if (denied) return denied;
   if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const email = input.email?.trim().toLowerCase() || null;
 
   if (!isSupabaseConfigured()) {
     const id = crypto.randomUUID();
@@ -130,6 +132,7 @@ export async function createJurado(input: {
       id,
       concursoId: input.concursoId || MOCK_CONCURSO_ID,
       nombre: input.nombre,
+      email,
       userId: null,
       activo: input.activo,
     });
@@ -145,6 +148,7 @@ export async function createJurado(input: {
     .insert({
       concurso_id: input.concursoId,
       nombre: input.nombre,
+      email,
       activo: input.activo,
     })
     .select("id")
@@ -163,16 +167,23 @@ export async function createJurado(input: {
 
 export async function updateJurado(
   id: string,
-  input: { nombre: string; activo: boolean; categoriaIds: string[] },
+  input: {
+    nombre: string;
+    email: string | null;
+    activo: boolean;
+    categoriaIds: string[];
+  },
 ): Promise<Result> {
   const denied = await assertAdmin();
   if (denied) return denied;
   if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const email = input.email?.trim().toLowerCase() || null;
 
   if (!isSupabaseConfigured()) {
     const item = mockJurados.find((j) => j.id === id);
     if (!item) return invalid("Jurado no encontrado.");
     item.nombre = input.nombre;
+    item.email = email;
     item.activo = input.activo;
     for (let i = mockJuradoCategorias.length - 1; i >= 0; i--) {
       if (mockJuradoCategorias[i].juradoId === id) {
@@ -188,7 +199,7 @@ export async function updateJurado(
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("jurados")
-    .update({ nombre: input.nombre, activo: input.activo })
+    .update({ nombre: input.nombre, email, activo: input.activo })
     .eq("id", id);
 
   if (error) return invalid(error.message);
@@ -408,5 +419,80 @@ export async function deleteCriterio(id: string): Promise<Result> {
 
   const supabase = await createServerClient();
   const { error } = await supabase.from("categoria_criterios").delete().eq("id", id);
+  return error ? invalid(error.message) : { ok: true };
+}
+
+// --- Admin invites (acceso por email) ---
+
+const mockAdminInvites: { email: string; nombre: string }[] = [];
+
+export async function listAdminInvites(): Promise<{ email: string; nombre: string }[]> {
+  const denied = await assertAdmin();
+  if (denied) return [];
+
+  if (!isSupabaseConfigured()) {
+    return [...mockAdminInvites];
+  }
+
+  const supabase = await createServerClient();
+  const { data } = await supabase
+    .from("admin_invites")
+    .select("email, nombre")
+    .order("email");
+
+  return (data ?? []).map((row) => ({
+    email: String(row.email),
+    nombre: String(row.nombre ?? ""),
+  }));
+}
+
+export async function createAdminInvite(input: {
+  email: string;
+  nombre: string;
+}): Promise<Result> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+
+  const email = input.email.trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    return invalid("Ingresa un email valido.");
+  }
+
+  if (!isSupabaseConfigured()) {
+    if (mockAdminInvites.some((i) => i.email === email)) {
+      return invalid("Ese email ya tiene invitacion de admin.");
+    }
+    mockAdminInvites.push({ email, nombre: input.nombre.trim() || email });
+    return { ok: true };
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.from("admin_invites").insert({
+    email,
+    nombre: input.nombre.trim() || email.split("@")[0],
+  });
+
+  return error ? invalid(error.message) : { ok: true };
+}
+
+export async function deleteAdminInvite(email: string): Promise<Result> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+
+  const normalized = email.trim().toLowerCase();
+
+  if (!isSupabaseConfigured()) {
+    const idx = mockAdminInvites.findIndex((i) => i.email === normalized);
+    if (idx === -1) return invalid("Invitacion no encontrada.");
+    mockAdminInvites.splice(idx, 1);
+    return { ok: true };
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("admin_invites")
+    .delete()
+    .eq("email", normalized);
+
   return error ? invalid(error.message) : { ok: true };
 }

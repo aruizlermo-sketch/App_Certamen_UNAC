@@ -7,6 +7,8 @@ import {
   createCriterio,
   createJurado,
   createParticipante,
+  createAdminInvite,
+  deleteAdminInvite,
   deleteCategoria,
   deleteCriterio,
   deleteJurado,
@@ -31,6 +33,7 @@ function revalidateAdminPaths() {
   revalidatePath("/admin/participantes");
   revalidatePath("/admin/jurados");
   revalidatePath("/admin/categorias");
+  revalidatePath("/admin/usuarios");
   revalidatePath("/");
   revalidatePath("/jurado");
   revalidatePath("/resultados");
@@ -81,6 +84,7 @@ export async function createJuradoAction(formData: FormData): Promise<ActionResu
   const result = await createJurado({
     concursoId: String(formData.get("concursoId") ?? ""),
     nombre: String(formData.get("nombre") ?? "").trim(),
+    email: String(formData.get("email") ?? "").trim() || null,
     activo: formData.get("activo") !== "false",
     categoriaIds,
   });
@@ -97,6 +101,7 @@ export async function updateJuradoAction(formData: FormData): Promise<ActionResu
 
   const result = await updateJurado(String(formData.get("id") ?? ""), {
     nombre: String(formData.get("nombre") ?? "").trim(),
+    email: String(formData.get("email") ?? "").trim() || null,
     activo: formData.get("activo") !== "false",
     categoriaIds,
   });
@@ -190,6 +195,28 @@ export async function deleteCriterioAction(id: string): Promise<ActionResult> {
   if (denied) return denied;
 
   const result = await deleteCriterio(id);
+  if (result.ok) revalidateAdminPaths();
+  return result.ok ? { ok: true } : result;
+}
+
+export async function createAdminInviteAction(formData: FormData): Promise<ActionResult> {
+  const denied = await guardAdmin();
+  if (denied) return denied;
+
+  const result = await createAdminInvite({
+    email: String(formData.get("email") ?? ""),
+    nombre: String(formData.get("nombre") ?? ""),
+  });
+
+  if (result.ok) revalidateAdminPaths();
+  return result.ok ? { ok: true } : result;
+}
+
+export async function deleteAdminInviteAction(email: string): Promise<ActionResult> {
+  const denied = await guardAdmin();
+  if (denied) return denied;
+
+  const result = await deleteAdminInvite(email);
   if (result.ok) revalidateAdminPaths();
   return result.ok ? { ok: true } : result;
 }

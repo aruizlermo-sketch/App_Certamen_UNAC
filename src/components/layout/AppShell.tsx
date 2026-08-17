@@ -55,6 +55,7 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { href: "/admin/participantes", label: "Participantes", icon: <IconUsers className="h-4 w-4" /> },
       { href: "/admin/jurados", label: "Jurados", icon: <IconUser className="h-4 w-4" /> },
+      { href: "/admin/usuarios", label: "Accesos", icon: <IconUser className="h-4 w-4" /> },
       { href: "/admin/categorias", label: "Categorias", icon: <IconChart className="h-4 w-4" /> },
     ],
   },
@@ -111,6 +112,7 @@ function pageTitle(pathname: string) {
   if (pathname === "/") return "Inicio";
   if (pathname.startsWith("/admin/participantes")) return "Participantes";
   if (pathname.startsWith("/admin/jurados")) return "Jurados";
+  if (pathname.startsWith("/admin/usuarios")) return "Accesos";
   if (pathname.startsWith("/admin/categorias")) return "Categorias";
   if (pathname.startsWith("/admin")) return "Configuracion";
   if (pathname.startsWith("/jurado")) return "Calificacion";

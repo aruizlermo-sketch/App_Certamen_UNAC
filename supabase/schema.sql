@@ -70,6 +70,7 @@ create table if not exists jurados (
   id uuid primary key default gen_random_uuid(),
   concurso_id uuid not null references concursos (id) on delete cascade,
   nombre text not null,
+  email text,
   user_id uuid references auth.users (id) on delete set null,
   activo boolean not null default true,
   created_at timestamptz not null default now()

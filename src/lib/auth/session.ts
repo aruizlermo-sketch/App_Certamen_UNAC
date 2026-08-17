@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
 import { mockJurados } from "@/lib/certamen/mock-data";
+import { linkUserByEmail } from "@/lib/auth/link-account";
 import type { UserRol } from "@/types/certamen";
 
 export type AppSession = {
@@ -42,6 +43,8 @@ export async function getAppSession(): Promise<AppSession> {
       isDemo: false,
     };
   }
+
+  await linkUserByEmail(user.id, user.email);
 
   const { data: profile } = await supabase
     .from("profiles")

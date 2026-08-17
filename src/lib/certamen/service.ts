@@ -123,6 +123,7 @@ export async function getConcursoCompleto(
       id: String(j.id),
       concursoId: String(j.concurso_id),
       nombre: String(j.nombre),
+      email: j.email ? String(j.email) : null,
       userId: j.user_id ? String(j.user_id) : null,
       activo: Boolean(j.activo),
     })),
