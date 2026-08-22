@@ -54,7 +54,7 @@ export function UsuariosAdminClient({ invites }: UsuariosAdminClientProps) {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-unac-navy">
+      <div className="info-banner">
         Asigna correos de <strong>administrador</strong>. Cuando esa persona entre
         con Google o email/contraseña, recibira rol admin automaticamente. No
         necesitas copiar UUID de Supabase.

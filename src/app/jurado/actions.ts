@@ -32,8 +32,9 @@ export async function saveScoreAction(formData: FormData) {
 
   if (result.ok) {
     revalidatePath("/jurado");
-    if (session.rol === "admin") {
+    if (session.rol === "admin" || session.esPresidente) {
       revalidatePath("/resultados");
+      revalidatePath("/resultados/notas");
       revalidatePath("/");
     }
   }
@@ -81,8 +82,9 @@ export async function saveScoresAction(input: SaveScoresInput) {
   }
 
   revalidatePath("/jurado");
-  if (session.rol === "admin") {
+  if (session.rol === "admin" || session.esPresidente) {
     revalidatePath("/resultados");
+    revalidatePath("/resultados/notas");
     revalidatePath("/");
   }
 

@@ -322,7 +322,7 @@ export function CategoriasAdminClient({
             </div>
 
             {activeCategoriaId === cat.id ? (
-              <form onSubmit={handleCriterioSubmit} className="mt-4 space-y-3 rounded-xl border border-border bg-white p-4">
+              <form onSubmit={handleCriterioSubmit} className="mt-4 space-y-3 rounded-xl border border-border bg-card p-4">
                 <h4 className="text-sm font-bold">
                   {editingCritId ? "Editar criterio" : "Nuevo criterio"}
                 </h4>

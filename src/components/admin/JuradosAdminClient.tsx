@@ -258,7 +258,7 @@ export function JuradosAdminClient({
                       {j.userId ? "Cuenta vinculada" : "Sin vincular"}
                     </span>
                     {j.esPresidente ? (
-                      <span className="status-pill bg-brand-soft text-unac-navy-dark">
+                      <span className="status-pill bg-brand-soft text-text">
                         Presidente
                       </span>
                     ) : null}

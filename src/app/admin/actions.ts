@@ -38,6 +38,7 @@ function revalidateAdminPaths() {
   revalidatePath("/");
   revalidatePath("/jurado");
   revalidatePath("/resultados");
+  revalidatePath("/resultados/notas");
 }
 
 export async function createParticipanteAction(formData: FormData): Promise<ActionResult> {

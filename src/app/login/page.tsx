@@ -1,5 +1,6 @@
 import { LoginForm } from "@/app/login/LoginForm";
 import { BrandLogo } from "@/components/brand/BrandMark";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import Link from "next/link";
 
@@ -16,9 +17,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div className="min-h-screen bg-page-bg">
-      <div className="top-bar flex items-center justify-between px-6 py-2">
+      <div className="top-bar flex items-center justify-between gap-4 px-6 py-2">
         <p>Universidad Nacional del Callao</p>
-        <p className="text-white/70">unac.edu.pe</p>
+        <div className="flex items-center gap-3">
+          <ThemeToggle showLabel={false} inverse />
+          <p className="text-white/70">unac.edu.pe</p>
+        </div>
       </div>
 
       <div className="hero-banner px-6 py-10 text-center text-white">

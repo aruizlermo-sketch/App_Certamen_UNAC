@@ -33,6 +33,21 @@
   --font-base: var(--font-inter), "Segoe UI", system-ui, sans-serif;
 }
 
+.dark {
+  --page-bg: #0b1220;
+  --card: #151d2e;
+  --text: #e8eef6;
+  --text-muted: #8fa3ba;
+  --border: #273449;
+  --blue-soft: #1a3050;
+  --green-soft: #143326;
+  --coral-soft: #3a2224;
+  --brand-soft: #3a3218;
+  --unac-gold-soft: #3a3218;
+  --background: var(--page-bg);
+  --foreground: var(--text);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -95,11 +110,11 @@ body {
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-md border border-border bg-white px-5 py-2.5 text-sm font-semibold text-text transition hover:bg-page-bg disabled:opacity-60;
+    @apply inline-flex items-center justify-center rounded-md border border-border bg-card px-5 py-2.5 text-sm font-semibold text-text transition hover:bg-page-bg disabled:opacity-60;
   }
 
   .input-field {
-    @apply w-full rounded-md border border-border bg-white px-3.5 py-2.5 text-sm text-text outline-none transition placeholder:text-text-muted;
+    @apply w-full rounded-md border border-border bg-card px-3.5 py-2.5 text-sm text-text outline-none transition placeholder:text-text-muted;
   }
 
   .input-field:focus {
@@ -108,7 +123,7 @@ body {
   }
 
   .combobox {
-    @apply w-full appearance-none rounded-md border border-border bg-white px-3.5 py-2.5 text-sm font-medium text-text outline-none transition;
+    @apply w-full appearance-none rounded-md border border-border bg-card px-3.5 py-2.5 text-sm font-medium text-text outline-none transition;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2307294d' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
@@ -121,7 +136,7 @@ body {
   }
 
   .btn-choice {
-    @apply rounded-md border border-border bg-white px-3 py-2.5 text-left text-sm font-medium text-text transition;
+    @apply rounded-md border border-border bg-card px-3 py-2.5 text-left text-sm font-medium text-text transition;
   }
 
   .btn-choice:hover {
@@ -138,7 +153,7 @@ body {
   }
 
   .btn-score {
-    @apply min-w-[2.75rem] rounded-md border border-border bg-white px-2 py-2 text-sm font-semibold text-text transition disabled:opacity-50;
+    @apply min-w-[2.75rem] rounded-md border border-border bg-card px-2 py-2 text-sm font-semibold text-text transition disabled:opacity-50;
   }
 
   .btn-score:hover:not(:disabled) {
@@ -155,6 +170,10 @@ body {
 
   .card-panel {
     @apply rounded-lg border border-border bg-card shadow-[0_4px_16px_rgba(7,41,77,0.06)];
+  }
+
+  .dark .card-panel {
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.25);
   }
 
   .section-eyebrow {
@@ -196,6 +215,10 @@ body {
     @apply rounded-lg border border-border bg-card p-5 shadow-[0_4px_16px_rgba(7,41,77,0.06)];
   }
 
+  .dark .kpi-card {
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.25);
+  }
+
   .kpi-card-accent {
     border-top: 3px solid var(--unac-gold);
   }
@@ -205,7 +228,11 @@ body {
   }
 
   .score-input {
-    @apply w-16 rounded-md border border-border bg-white px-2 py-1.5 text-center text-sm font-semibold text-text outline-none transition;
+    @apply w-16 rounded-md border border-border bg-card px-2 py-1.5 text-center text-sm font-semibold text-text outline-none transition;
+  }
+
+  .info-banner {
+    @apply rounded-xl border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-text;
   }
 
   .score-input:focus {

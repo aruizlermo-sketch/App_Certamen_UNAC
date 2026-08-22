@@ -31,7 +31,7 @@ export function JuradoSelector({
       <div
         className={`rounded-xl px-4 py-3 text-sm ${
           adminMode
-            ? "border border-blue-soft bg-blue-soft text-unac-navy"
+            ? "border border-blue-soft bg-blue-soft text-text"
             : "border border-amber-soft bg-amber-soft text-amber-900"
         }`}
       >

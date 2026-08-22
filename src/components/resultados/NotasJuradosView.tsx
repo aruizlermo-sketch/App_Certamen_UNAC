@@ -29,7 +29,7 @@ export function NotasJuradosView({
   return (
     <div className="space-y-6">
       {readOnly ? (
-        <div className="rounded-xl border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-unac-navy">
+        <div className="info-banner">
           <strong>Solo lectura:</strong> puedes ver las notas de todos los jurados
           pero no modificarlas. Para calificar usa tu pantalla de Calificar.
         </div>

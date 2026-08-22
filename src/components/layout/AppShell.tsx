@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { logoutAction } from "@/app/login/actions";
 import { BrandHeader } from "@/components/brand/BrandMark";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import {
   IconChart,
   IconClipboard,
@@ -49,6 +50,7 @@ const adminNavGroups: NavGroup[] = [
       { href: "/admin", label: "Configuracion", icon: <IconClipboard className="h-4 w-4" /> },
       { href: "/jurado", label: "Calificar", icon: <IconStar className="h-4 w-4" /> },
       { href: "/resultados", label: "Resultados", icon: <IconTrophy className="h-4 w-4" /> },
+      { href: "/resultados/notas", label: "Notas jurados", icon: <IconChart className="h-4 w-4" /> },
     ],
   },
   {
@@ -230,12 +232,12 @@ export function AppShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-border bg-white px-4 py-4 shadow-sm sm:px-6">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-4 shadow-sm sm:px-6">
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 aria-label="Abrir menu"
-                className="rounded-md border border-border bg-white p-2.5 text-text lg:hidden"
+                className="rounded-md border border-border bg-card p-2.5 text-text lg:hidden"
                 onClick={() => setOpen(true)}
               >
                 <IconMenu className="h-5 w-5" />
@@ -247,6 +249,7 @@ export function AppShell({
                 </h1>
               </div>
             </div>
+            <ThemeToggle showLabel={false} />
           </header>
 
           <main className="flex-1 p-4 sm:p-6">{children}</main>

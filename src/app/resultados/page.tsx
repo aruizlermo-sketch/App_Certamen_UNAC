@@ -21,7 +21,7 @@ export default async function ResultadosPage() {
   return (
     <div className="space-y-6">
       {session.esPresidente ? (
-        <div className="rounded-xl border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-unac-navy">
+        <div className="rounded-xl border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-text">
           <strong>Presidente del jurado:</strong> vista de resultados en solo
           lectura. Tus notas se editan solo desde Calificar.
         </div>
@@ -35,6 +35,11 @@ export default async function ResultadosPage() {
         <Link href={backHref} className="btn-secondary">
           {backLabel}
         </Link>
+        {session.rol === "admin" ? (
+          <Link href="/resultados/notas" className="btn-secondary">
+            Notas por jurado
+          </Link>
+        ) : null}
       </div>
 
       <ResultadosView resultados={resultados} readOnly={session.esPresidente} />

@@ -123,7 +123,7 @@ export function JuradoPageClient({
           />
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-border bg-white/60 px-5 py-8 text-center text-sm text-text-muted">
+        <div className="rounded-lg border border-dashed border-border bg-card/60 px-5 py-8 text-center text-sm text-text-muted">
           Selecciona una tuna y una categoria para comenzar a calificar.
         </div>
       )}
