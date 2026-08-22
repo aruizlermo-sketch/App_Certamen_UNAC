@@ -1,7 +1,7 @@
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
 import { getAppSession } from "@/lib/auth/session";
-import { canViewResultados } from "@/lib/auth/guards";
+import { canViewResultados, canViewAllCalificaciones } from "@/lib/auth/guards";
 import {
   assertJuradoOwnsCategory,
   filterCalificacionesForSession,
@@ -98,18 +98,23 @@ export async function getConcursoCompleto(
 
 export async function getCalificaciones(
   concursoId?: string,
-  options?: { forJuradoId?: string; viewAll?: boolean },
+  options?: {
+    forJuradoId?: string;
+    viewAll?: boolean;
+    scope?: "rankings" | "supervision";
+  },
 ): Promise<Calificacion[]> {
   const id = concursoId ?? mockConcurso.id;
   const session = await getAppSession();
+  const scope = options?.scope ?? "rankings";
   const viewAll =
-    options?.viewAll && (session.rol === "admin" || session.esPresidente);
+    options?.viewAll && canViewAllCalificaciones(session, scope);
 
   if (!isSupabaseConfigured()) {
     return filterCalificacionesForSession(
       getMockCalificaciones(),
       session,
-      { forJuradoId: options?.forJuradoId, viewAll },
+      { forJuradoId: options?.forJuradoId, viewAll, scope },
     );
   }
 
@@ -149,7 +154,10 @@ export async function getResultados(
   const concurso = await getConcursoCompleto(concursoId);
   if (!concurso) return null;
 
-  const calificaciones = await getCalificaciones(concurso.id, { viewAll: true });
+  const calificaciones = await getCalificaciones(concurso.id, {
+    viewAll: true,
+    scope: "rankings",
+  });
 
   const categorias = concurso.categorias.map(({ criterios: _, jurados: __, ...cat }) => cat);
   const criterios = concurso.categorias.flatMap((c) => c.criterios);

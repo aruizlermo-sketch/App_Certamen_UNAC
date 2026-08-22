@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { linkUserByEmail } from "@/lib/auth/link-account";
-import { canViewResultados } from "@/lib/auth/guards";
+import { canViewResultados, canViewNotasJurados } from "@/lib/auth/guards";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
 import type { AppSession } from "@/types/auth";
@@ -124,4 +124,14 @@ export async function requireResultadosAccess(): Promise<AppSession> {
   return session;
 }
 
-export { canViewResultados } from "@/lib/auth/guards";
+export async function requireNotasJuradosAccess(): Promise<AppSession> {
+  const session = await requireAuth();
+
+  if (!canViewNotasJurados(session)) {
+    redirect(session.juradoId ? "/jurado" : "/login");
+  }
+
+  return session;
+}
+
+export { canViewResultados, canViewNotasJurados, canPrintResultados } from "@/lib/auth/guards";

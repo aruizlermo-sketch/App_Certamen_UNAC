@@ -73,17 +73,25 @@ const juradoNavGroups: NavGroup[] = [
   },
 ];
 
+const juradoResultadosItem: NavItem = {
+  href: "/resultados",
+  label: "Resultados",
+  icon: <IconTrophy className="h-4 w-4" />,
+};
+
 const presidenteExtraItems: NavItem[] = [
-  { href: "/resultados", label: "Resultados", icon: <IconTrophy className="h-4 w-4" /> },
   { href: "/resultados/notas", label: "Notas jurados", icon: <IconChart className="h-4 w-4" /> },
 ];
 
 function buildJuradoNav(esPresidente: boolean): NavGroup[] {
-  if (!esPresidente) return juradoNavGroups;
+  const items = [...juradoNavGroups[0].items, juradoResultadosItem];
+  if (esPresidente) {
+    items.push(...presidenteExtraItems);
+  }
   return [
     {
       title: "Concurso",
-      items: [...juradoNavGroups[0].items, ...presidenteExtraItems],
+      items,
     },
   ];
 }
@@ -153,7 +161,7 @@ export function AppShell({
   return (
     <div className="min-h-full bg-page-bg">
       {/* Top bar estilo UNAC */}
-      <div className="top-bar hidden items-center justify-between px-6 py-2 lg:flex">
+      <div className="top-bar hidden items-center justify-between px-6 py-2 lg:flex no-print">
         <p>Universidad Nacional del Callao — Sistema de Calificacion</p>
         <p className="text-white/70">unac.edu.pe</p>
       </div>
@@ -169,7 +177,7 @@ export function AppShell({
         ) : null}
 
         <aside
-          className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar text-white transition-transform lg:static lg:translate-x-0 ${
+          className={`no-print fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-sidebar text-white transition-transform lg:static lg:translate-x-0 ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -232,7 +240,7 @@ export function AppShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-4 shadow-sm sm:px-6">
+          <header className="no-print sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-border bg-card px-4 py-4 shadow-sm sm:px-6">
             <div className="flex items-center gap-3">
               <button
                 type="button"

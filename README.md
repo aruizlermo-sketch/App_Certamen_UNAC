@@ -66,5 +66,5 @@ supabase/
 | Rol | Acceso |
 |-----|--------|
 | admin | Configuracion, CRUD, calificar como jurado, resultados, notas jurados |
-| jurado | Calificar (solo sus notas) |
-| presidente | Jurado + resultados y notas jurados (solo lectura) |
+| jurado | Calificar y ver resultados (solo lectura) |
+| presidente | Jurado + notas de todos los jurados + imprimir PDF |

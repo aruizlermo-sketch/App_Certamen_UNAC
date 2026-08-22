@@ -1,11 +1,17 @@
 import Link from "next/link";
+import { PrintResultadosButton } from "@/components/resultados/PrintResultadosButton";
 import { ResultadosView } from "@/components/resultados/ResultadosView";
-import { requireResultadosAccess } from "@/lib/auth/session";
+import {
+  canPrintResultados,
+  requireResultadosAccess,
+} from "@/lib/auth/session";
 import { getResultados } from "@/lib/certamen/service";
 
 export default async function ResultadosPage() {
   const session = await requireResultadosAccess();
   const resultados = await getResultados();
+  const isJurado = session.rol === "jurado";
+  const canPrint = canPrintResultados(session);
 
   if (!resultados) {
     return (
@@ -20,29 +26,42 @@ export default async function ResultadosPage() {
 
   return (
     <div className="space-y-6">
-      {session.esPresidente ? (
-        <div className="rounded-xl border border-blue-soft bg-blue-soft px-4 py-3 text-sm text-text">
-          <strong>Presidente del jurado:</strong> vista de resultados en solo
-          lectura. Tus notas se editan solo desde Calificar.
+      {isJurado ? (
+        <div className="info-banner no-print">
+          <strong>Vista de jurado:</strong> rankings del certamen en solo lectura.
+          {session.esPresidente
+            ? " Como presidente puedes imprimir el acta en PDF."
+            : " Tus notas se editan solo desde Calificar."}
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 no-print">
         <div className="section-heading">
           <p className="section-eyebrow">Resultados en vivo</p>
           <h2 className="section-title">{resultados.concurso.nombre}</h2>
         </div>
-        <Link href={backHref} className="btn-secondary">
-          {backLabel}
-        </Link>
-        {session.rol === "admin" ? (
-          <Link href="/resultados/notas" className="btn-secondary">
-            Notas por jurado
+        <div className="flex flex-wrap gap-2">
+          <Link href={backHref} className="btn-secondary">
+            {backLabel}
           </Link>
-        ) : null}
+          {session.rol === "admin" ? (
+            <Link href="/resultados/notas" className="btn-secondary">
+              Notas por jurado
+            </Link>
+          ) : null}
+          {canPrint ? <PrintResultadosButton /> : null}
+        </div>
       </div>
 
-      <ResultadosView resultados={resultados} readOnly={session.esPresidente} />
+      <div className="print-only mb-6 text-center">
+        <p className="text-xs uppercase tracking-widest text-text-muted">
+          Universidad Nacional del Callao
+        </p>
+        <h1 className="mt-2 text-2xl font-bold">{resultados.concurso.nombre}</h1>
+        <p className="mt-1 text-sm text-text-muted">Acta de resultados — {new Date().toLocaleDateString("es-PE")}</p>
+      </div>
+
+      <ResultadosView resultados={resultados} readOnly={isJurado} />
     </div>
   );
 }

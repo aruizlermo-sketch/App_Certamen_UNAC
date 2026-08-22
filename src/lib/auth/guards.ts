@@ -11,6 +11,28 @@ export async function assertAdminSession(): Promise<VoidResult | null> {
   return null;
 }
 
+/** Rankings del certamen: admin y cualquier jurado activo. */
 export function canViewResultados(session: AppSession): boolean {
+  return session.rol === "admin" || Boolean(session.juradoId);
+}
+
+/** Detalle nota por nota de todos los jurados. */
+export function canViewNotasJurados(session: AppSession): boolean {
   return session.rol === "admin" || session.esPresidente;
+}
+
+/** Imprimir / exportar PDF de resultados globales. */
+export function canPrintResultados(session: AppSession): boolean {
+  return session.rol === "admin" || session.esPresidente;
+}
+
+export type CalificacionesScope = "rankings" | "supervision";
+
+export function canViewAllCalificaciones(
+  session: AppSession,
+  scope: CalificacionesScope,
+): boolean {
+  if (session.rol === "admin") return true;
+  if (scope === "supervision") return session.esPresidente;
+  return Boolean(session.juradoId);
 }

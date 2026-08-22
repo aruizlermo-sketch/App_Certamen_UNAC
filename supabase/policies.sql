@@ -57,6 +57,19 @@ as $$
   );
 $$;
 
+create or replace function public.is_active_jurado()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from jurados
+    where user_id = auth.uid() and activo = true
+  );
+$$;
+
 -- ============================================================
 -- Vinculacion de cuentas por email
 -- ============================================================
@@ -209,8 +222,7 @@ create policy "calificaciones_jurado_select_own" on calificaciones
   for select to authenticated
   using (
     is_admin()
-    or is_presidente_jurado()
-    or jurado_id in (select my_jurado_ids())
+    or is_active_jurado()
   );
 
 drop policy if exists "calificaciones_jurado_insert_own" on calificaciones;

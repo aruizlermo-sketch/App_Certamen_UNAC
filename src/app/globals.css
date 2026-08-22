@@ -255,3 +255,44 @@ body {
     );
   }
 }
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 1.2cm;
+    size: A4;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  main {
+    padding: 0 !important;
+  }
+
+  .card-panel,
+  .kpi-card {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+
+  .section-heading::before {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

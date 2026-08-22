@@ -1,6 +1,7 @@
 import type { AppSession } from "@/types/auth";
 import type { ConcursoCompleto } from "@/types/certamen";
 import type { VoidResult } from "@/lib/result";
+import { canViewAllCalificaciones, type CalificacionesScope } from "@/lib/auth/guards";
 
 export function resolveJuradoIdForSave(
   session: AppSession,
@@ -45,11 +46,15 @@ export function filterCalificacionesForSession<
 >(
   items: T[],
   session: AppSession,
-  options?: { forJuradoId?: string; viewAll?: boolean },
+  options?: {
+    forJuradoId?: string;
+    viewAll?: boolean;
+    scope?: CalificacionesScope;
+  },
 ): T[] {
+  const scope = options?.scope ?? "rankings";
   const viewAll =
-    options?.viewAll &&
-    (session.rol === "admin" || session.esPresidente);
+    options?.viewAll && canViewAllCalificaciones(session, scope);
 
   if (session.isDemo && options?.forJuradoId) {
     return items.filter((c) => c.juradoId === options.forJuradoId);
