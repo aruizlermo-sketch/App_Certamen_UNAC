@@ -106,7 +106,7 @@ create index if not exists idx_participantes_concurso on participantes (concurso
 create index if not exists idx_jurados_concurso on jurados (concurso_id);
 create index if not exists idx_calificaciones_lookup on calificaciones (participante_id, categoria_criterio_id);
 
--- RLS
+-- RLS habilitado. Las politicas de produccion estan en policies.sql
 alter table profiles enable row level security;
 alter table concursos enable row level security;
 alter table categorias enable row level security;
@@ -116,14 +116,22 @@ alter table jurados enable row level security;
 alter table jurado_categorias enable row level security;
 alter table calificaciones enable row level security;
 
-create policy "authenticated_all_profiles" on profiles for all to authenticated using (true) with check (true);
-create policy "authenticated_all_concursos" on concursos for all to authenticated using (true) with check (true);
-create policy "authenticated_all_categorias" on categorias for all to authenticated using (true) with check (true);
-create policy "authenticated_all_criterios" on categoria_criterios for all to authenticated using (true) with check (true);
-create policy "authenticated_all_participantes" on participantes for all to authenticated using (true) with check (true);
-create policy "authenticated_all_jurados" on jurados for all to authenticated using (true) with check (true);
-create policy "authenticated_all_jurado_categorias" on jurado_categorias for all to authenticated using (true) with check (true);
-create policy "authenticated_all_calificaciones" on calificaciones for all to authenticated using (true) with check (true);
+-- Invitaciones admin (vinculacion por email)
+create table if not exists admin_invites (
+  email text primary key,
+  nombre text not null default '',
+  created_at timestamptz not null default now()
+);
+
+alter table admin_invites enable row level security;
+
+create unique index if not exists idx_jurados_email_unique
+  on jurados (lower(trim(email)))
+  where email is not null and trim(email) <> '';
+
+create unique index if not exists idx_jurados_un_presidente_por_concurso
+  on jurados (concurso_id)
+  where es_presidente = true;
 
 -- ============================================================
 -- SEED: Certamen UNAC 2026

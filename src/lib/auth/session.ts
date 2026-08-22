@@ -1,19 +1,12 @@
 import { redirect } from "next/navigation";
+import { linkUserByEmail } from "@/lib/auth/link-account";
+import { canViewResultados } from "@/lib/auth/guards";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
-import { mockJurados } from "@/lib/certamen/mock-data";
-import { linkUserByEmail } from "@/lib/auth/link-account";
+import type { AppSession } from "@/types/auth";
 import type { UserRol } from "@/types/certamen";
 
-export type AppSession = {
-  userId: string | null;
-  email: string | null;
-  rol: UserRol;
-  juradoId: string | null;
-  juradoNombre: string | null;
-  esPresidente: boolean;
-  isDemo: boolean;
-};
+export type { AppSession } from "@/types/auth";
 
 const demoSession: AppSession = {
   userId: null,
@@ -131,26 +124,4 @@ export async function requireResultadosAccess(): Promise<AppSession> {
   return session;
 }
 
-/** En demo, simula sesión de un jurado concreto. */
-export function demoJuradoSession(juradoId: string): AppSession {
-  const jurado = mockJurados.find((j) => j.id === juradoId);
-  return {
-    ...demoSession,
-    rol: "jurado",
-    juradoId,
-    juradoNombre: jurado?.nombre ?? null,
-    esPresidente: jurado?.esPresidente ?? false,
-  };
-}
-
-export function isAdmin(session: AppSession): boolean {
-  return session.rol === "admin";
-}
-
-export function canViewResultados(session: AppSession): boolean {
-  return session.rol === "admin" || session.esPresidente;
-}
-
-export function canAccessAdmin(session: AppSession): boolean {
-  return session.rol === "admin";
-}
+export { canViewResultados } from "@/lib/auth/guards";

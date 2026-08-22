@@ -1,6 +1,6 @@
+import { assertAdminSession } from "@/lib/auth/guards";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
-import { getAppSession } from "@/lib/auth/session";
 import {
   MOCK_CONCURSO_ID,
   mockCategorias,
@@ -9,20 +9,8 @@ import {
   mockJurados,
   mockParticipantes,
 } from "@/lib/certamen/mock-data";
-
-type Result = { ok: true } | { ok: false; error: string };
-
-async function assertAdmin(): Promise<Result | null> {
-  const session = await getAppSession();
-  if (!session.isDemo && session.rol !== "admin") {
-    return { ok: false, error: "No autorizado." };
-  }
-  return null;
-}
-
-function invalid(message: string): Result {
-  return { ok: false, error: message };
-}
+import { fail, ok, type VoidResult } from "@/lib/result";
+import { normalizeEmail, requireEmail, requireNombre } from "@/lib/validators";
 
 // --- Participantes ---
 
@@ -30,10 +18,11 @@ export async function createParticipante(input: {
   concursoId: string;
   nombre: string;
   orden: number;
-}): Promise<Result> {
-  const denied = await assertAdmin();
+}): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
 
   if (!isSupabaseConfigured()) {
     mockParticipantes.push({
@@ -42,7 +31,7 @@ export async function createParticipante(input: {
       nombre: input.nombre,
       orden: input.orden,
     });
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -52,23 +41,24 @@ export async function createParticipante(input: {
     orden: input.orden,
   });
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
 export async function updateParticipante(
   id: string,
   input: { nombre: string; orden: number },
-): Promise<Result> {
-  const denied = await assertAdmin();
+): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
 
   if (!isSupabaseConfigured()) {
     const item = mockParticipantes.find((p) => p.id === id);
-    if (!item) return invalid("Participante no encontrado.");
+    if (!item) return fail("Participante no encontrado.");
     item.nombre = input.nombre;
     item.orden = input.orden;
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -77,23 +67,23 @@ export async function updateParticipante(
     .update({ nombre: input.nombre, orden: input.orden })
     .eq("id", id);
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
-export async function deleteParticipante(id: string): Promise<Result> {
-  const denied = await assertAdmin();
+export async function deleteParticipante(id: string): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
 
   if (!isSupabaseConfigured()) {
     const idx = mockParticipantes.findIndex((p) => p.id === id);
-    if (idx === -1) return invalid("Participante no encontrado.");
+    if (idx === -1) return fail("Participante no encontrado.");
     mockParticipantes.splice(idx, 1);
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
   const { error } = await supabase.from("participantes").delete().eq("id", id);
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
 // --- Jurados ---
@@ -153,11 +143,12 @@ export async function createJurado(input: {
   activo: boolean;
   esPresidente: boolean;
   categoriaIds: string[];
-}): Promise<Result> {
-  const denied = await assertAdmin();
+}): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
-  const email = input.email?.trim().toLowerCase() || null;
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
+  const email = normalizeEmail(input.email);
 
   if (!isSupabaseConfigured()) {
     const id = crypto.randomUUID();
@@ -174,7 +165,7 @@ export async function createJurado(input: {
       mockJuradoCategorias.push({ juradoId: id, categoriaId });
     }
     await syncPresidente(input.concursoId || MOCK_CONCURSO_ID, id, input.esPresidente);
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -189,16 +180,16 @@ export async function createJurado(input: {
     .select("id")
     .single();
 
-  if (error || !data) return invalid(error?.message ?? "No se pudo crear el jurado.");
+  if (error || !data) return fail(error?.message ?? "No se pudo crear el jurado.");
 
   try {
     await syncJuradoCategorias(String(data.id), input.categoriaIds);
     await syncPresidente(input.concursoId, String(data.id), input.esPresidente);
   } catch (e) {
-    return invalid(e instanceof Error ? e.message : "Error al asignar categorias.");
+    return fail(e instanceof Error ? e.message : "Error al asignar categorias.");
   }
 
-  return { ok: true };
+  return ok();
 }
 
 export async function updateJurado(
@@ -210,15 +201,16 @@ export async function updateJurado(
     esPresidente: boolean;
     categoriaIds: string[];
   },
-): Promise<Result> {
-  const denied = await assertAdmin();
+): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
-  const email = input.email?.trim().toLowerCase() || null;
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
+  const email = normalizeEmail(input.email);
 
   if (!isSupabaseConfigured()) {
     const item = mockJurados.find((j) => j.id === id);
-    if (!item) return invalid("Jurado no encontrado.");
+    if (!item) return fail("Jurado no encontrado.");
     item.nombre = input.nombre;
     item.email = email;
     item.activo = input.activo;
@@ -231,7 +223,7 @@ export async function updateJurado(
       mockJuradoCategorias.push({ juradoId: id, categoriaId });
     }
     await syncPresidente(item.concursoId, id, input.esPresidente);
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -256,7 +248,7 @@ export async function updateJurado(
     })
     .eq("id", id);
 
-  if (error) return invalid(error.message);
+  if (error) return fail(error.message);
 
   try {
     await syncJuradoCategorias(id, input.categoriaIds);
@@ -264,21 +256,21 @@ export async function updateJurado(
       await syncPresidente(String(existing.concurso_id), id, input.esPresidente);
     }
   } catch (e) {
-    return invalid(e instanceof Error ? e.message : "Error al asignar categorias.");
+    return fail(e instanceof Error ? e.message : "Error al asignar categorias.");
   }
 
-  return { ok: true };
+  return ok();
 }
 
-export async function resetJuradoLink(id: string): Promise<Result> {
-  const denied = await assertAdmin();
+export async function resetJuradoLink(id: string): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
 
   if (!isSupabaseConfigured()) {
     const item = mockJurados.find((j) => j.id === id);
-    if (!item) return invalid("Jurado no encontrado.");
+    if (!item) return fail("Jurado no encontrado.");
     item.userId = null;
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -287,28 +279,28 @@ export async function resetJuradoLink(id: string): Promise<Result> {
     .update({ user_id: null })
     .eq("id", id);
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
-export async function deleteJurado(id: string): Promise<Result> {
-  const denied = await assertAdmin();
+export async function deleteJurado(id: string): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
 
   if (!isSupabaseConfigured()) {
     const idx = mockJurados.findIndex((j) => j.id === id);
-    if (idx === -1) return invalid("Jurado no encontrado.");
+    if (idx === -1) return fail("Jurado no encontrado.");
     mockJurados.splice(idx, 1);
     for (let i = mockJuradoCategorias.length - 1; i >= 0; i--) {
       if (mockJuradoCategorias[i].juradoId === id) {
         mockJuradoCategorias.splice(i, 1);
       }
     }
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
   const { error } = await supabase.from("jurados").delete().eq("id", id);
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
 // --- Categorias ---
@@ -319,10 +311,11 @@ export async function createCategoria(input: {
   descripcion: string | null;
   pesoTotal: number;
   orden: number;
-}): Promise<Result> {
-  const denied = await assertAdmin();
+}): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
 
   if (!isSupabaseConfigured()) {
     mockCategorias.push({
@@ -333,7 +326,7 @@ export async function createCategoria(input: {
       pesoTotal: input.pesoTotal,
       orden: input.orden,
     });
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -345,7 +338,7 @@ export async function createCategoria(input: {
     orden: input.orden,
   });
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
 export async function updateCategoria(
@@ -356,19 +349,20 @@ export async function updateCategoria(
     pesoTotal: number;
     orden: number;
   },
-): Promise<Result> {
-  const denied = await assertAdmin();
+): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
 
   if (!isSupabaseConfigured()) {
     const item = mockCategorias.find((c) => c.id === id);
-    if (!item) return invalid("Categoria no encontrada.");
+    if (!item) return fail("Categoria no encontrada.");
     item.nombre = input.nombre;
     item.descripcion = input.descripcion;
     item.pesoTotal = input.pesoTotal;
     item.orden = input.orden;
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -382,16 +376,16 @@ export async function updateCategoria(
     })
     .eq("id", id);
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
-export async function deleteCategoria(id: string): Promise<Result> {
-  const denied = await assertAdmin();
+export async function deleteCategoria(id: string): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
 
   if (!isSupabaseConfigured()) {
     const idx = mockCategorias.findIndex((c) => c.id === id);
-    if (idx === -1) return invalid("Categoria no encontrada.");
+    if (idx === -1) return fail("Categoria no encontrada.");
     mockCategorias.splice(idx, 1);
     for (let i = mockCriterios.length - 1; i >= 0; i--) {
       if (mockCriterios[i].categoriaId === id) mockCriterios.splice(i, 1);
@@ -401,12 +395,12 @@ export async function deleteCategoria(id: string): Promise<Result> {
         mockJuradoCategorias.splice(i, 1);
       }
     }
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
   const { error } = await supabase.from("categorias").delete().eq("id", id);
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
 // --- Criterios ---
@@ -417,10 +411,11 @@ export async function createCriterio(input: {
   descripcion: string | null;
   peso: number;
   orden: number;
-}): Promise<Result> {
-  const denied = await assertAdmin();
+}): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
 
   if (!isSupabaseConfigured()) {
     mockCriterios.push({
@@ -431,7 +426,7 @@ export async function createCriterio(input: {
       peso: input.peso,
       orden: input.orden,
     });
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -443,7 +438,7 @@ export async function createCriterio(input: {
     orden: input.orden,
   });
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
 export async function updateCriterio(
@@ -454,19 +449,20 @@ export async function updateCriterio(
     peso: number;
     orden: number;
   },
-): Promise<Result> {
-  const denied = await assertAdmin();
+): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
-  if (!input.nombre) return invalid("El nombre es obligatorio.");
+  const nombreError = requireNombre(input.nombre);
+  if (nombreError) return nombreError;
 
   if (!isSupabaseConfigured()) {
     const item = mockCriterios.find((c) => c.id === id);
-    if (!item) return invalid("Criterio no encontrado.");
+    if (!item) return fail("Criterio no encontrado.");
     item.nombre = input.nombre;
     item.descripcion = input.descripcion;
     item.peso = input.peso;
     item.orden = input.orden;
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -480,23 +476,23 @@ export async function updateCriterio(
     })
     .eq("id", id);
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
-export async function deleteCriterio(id: string): Promise<Result> {
-  const denied = await assertAdmin();
+export async function deleteCriterio(id: string): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
 
   if (!isSupabaseConfigured()) {
     const idx = mockCriterios.findIndex((c) => c.id === id);
-    if (idx === -1) return invalid("Criterio no encontrado.");
+    if (idx === -1) return fail("Criterio no encontrado.");
     mockCriterios.splice(idx, 1);
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
   const { error } = await supabase.from("categoria_criterios").delete().eq("id", id);
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
 // --- Admin invites (acceso por email) ---
@@ -504,7 +500,7 @@ export async function deleteCriterio(id: string): Promise<Result> {
 const mockAdminInvites: { email: string; nombre: string }[] = [];
 
 export async function listAdminInvites(): Promise<{ email: string; nombre: string }[]> {
-  const denied = await assertAdmin();
+  const denied = await assertAdminSession();
   if (denied) return [];
 
   if (!isSupabaseConfigured()) {
@@ -526,21 +522,20 @@ export async function listAdminInvites(): Promise<{ email: string; nombre: strin
 export async function createAdminInvite(input: {
   email: string;
   nombre: string;
-}): Promise<Result> {
-  const denied = await assertAdmin();
+}): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
 
-  const email = input.email.trim().toLowerCase();
-  if (!email || !email.includes("@")) {
-    return invalid("Ingresa un email valido.");
-  }
+  const emailCheck = requireEmail(input.email);
+  if (!emailCheck.ok) return emailCheck;
+  const email = emailCheck.email;
 
   if (!isSupabaseConfigured()) {
     if (mockAdminInvites.some((i) => i.email === email)) {
-      return invalid("Ese email ya tiene invitacion de admin.");
+      return fail("Ese email ya tiene invitacion de admin.");
     }
     mockAdminInvites.push({ email, nombre: input.nombre.trim() || email });
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -549,20 +544,21 @@ export async function createAdminInvite(input: {
     nombre: input.nombre.trim() || email.split("@")[0],
   });
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }
 
-export async function deleteAdminInvite(email: string): Promise<Result> {
-  const denied = await assertAdmin();
+export async function deleteAdminInvite(email: string): Promise<VoidResult> {
+  const denied = await assertAdminSession();
   if (denied) return denied;
 
-  const normalized = email.trim().toLowerCase();
+  const normalized = normalizeEmail(email);
+  if (!normalized) return fail("Ingresa un email valido.");
 
   if (!isSupabaseConfigured()) {
     const idx = mockAdminInvites.findIndex((i) => i.email === normalized);
-    if (idx === -1) return invalid("Invitacion no encontrada.");
+    if (idx === -1) return fail("Invitacion no encontrada.");
     mockAdminInvites.splice(idx, 1);
-    return { ok: true };
+    return ok();
   }
 
   const supabase = await createServerClient();
@@ -571,5 +567,5 @@ export async function deleteAdminInvite(email: string): Promise<Result> {
     .delete()
     .eq("email", normalized);
 
-  return error ? invalid(error.message) : { ok: true };
+  return error ? fail(error.message) : ok();
 }

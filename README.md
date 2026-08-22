@@ -22,26 +22,36 @@ Abre [http://localhost:3001](http://localhost:3001). Sin Supabase configurado, l
 ## Supabase (produccion)
 
 1. Crea un proyecto en Supabase
-2. Ejecuta `supabase/schema.sql` en el SQL Editor
-3. Crea usuarios en Authentication → Users
-4. Vincula jurados: `UPDATE jurados SET user_id = '<uuid>' WHERE nombre = '...'`
-5. Crea `.env.local`:
+2. Ejecuta en el SQL Editor, **en orden**:
+   - `supabase/schema.sql`
+   - `supabase/policies.sql`
+3. Crea `.env.local`:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```
 
+4. Primer admin: **Admin → Accesos** → agregar email → entrar con Google o email/contrasena
+5. Jurados: **Admin → Jurados** → email de acceso → el jurado entra con ese correo
+
+Ver `supabase/README.md` para migraciones y troubleshooting.
+
 ## Estructura
 
 ```
-src/app/
-  admin/          Configuracion del concurso
-  jurado/         Grilla de calificacion
-  resultados/     Rankings (publico)
-  login/          Autenticacion
-src/lib/certamen/ Servicios + agregador de puntajes
-supabase/         Schema + seed UNAC 2026
+src/
+  app/              Rutas (admin, jurado, resultados, login)
+  components/       UI por dominio
+  lib/
+    auth/           Sesion, permisos, guards
+    certamen/       Servicios, agregador, mappers, mock
+    result.ts       Tipos de resultado compartidos
+    validators.ts   Validacion de inputs
+  types/            Dominio + auth
+supabase/
+  schema.sql        DDL + seed
+  policies.sql      RLS + vinculacion email + presidente
 ```
 
 ## Reglas de puntuacion
@@ -49,3 +59,11 @@ supabase/         Schema + seed UNAC 2026
 - Escala 1–10 por criterio
 - Promedio de jurados por criterio, ponderado (40/30/30)
 - Puntaje total = suma de (puntaje categoria × 20%)
+
+## Roles
+
+| Rol | Acceso |
+|-----|--------|
+| admin | Configuracion, CRUD, calificar como jurado, resultados, notas jurados |
+| jurado | Calificar (solo sus notas) |
+| presidente | Jurado + resultados y notas jurados (solo lectura) |

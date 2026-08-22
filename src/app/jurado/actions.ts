@@ -1,8 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { getAppSession } from "@/lib/auth/session";
 import { getCalificaciones, saveCalificacion } from "@/lib/certamen/service";
+import { revalidateCertamenPaths } from "@/lib/revalidate-paths";
 
 export async function loadCalificacionesAction(juradoId: string) {
   return getCalificaciones(undefined, { forJuradoId: juradoId });
@@ -31,12 +31,7 @@ export async function saveScoreAction(formData: FormData) {
   });
 
   if (result.ok) {
-    revalidatePath("/jurado");
-    if (session.rol === "admin" || session.esPresidente) {
-      revalidatePath("/resultados");
-      revalidatePath("/resultados/notas");
-      revalidatePath("/");
-    }
+    revalidateCertamenPaths();
   }
 
   return result;
@@ -81,12 +76,6 @@ export async function saveScoresAction(input: SaveScoresInput) {
     }
   }
 
-  revalidatePath("/jurado");
-  if (session.rol === "admin" || session.esPresidente) {
-    revalidatePath("/resultados");
-    revalidatePath("/resultados/notas");
-    revalidatePath("/");
-  }
-
+  revalidateCertamenPaths();
   return { ok: true as const };
 }

@@ -54,7 +54,7 @@ const adminNavGroups: NavGroup[] = [
     ],
   },
   {
-    title: "Consultas",
+    title: "Gestion",
     items: [
       { href: "/admin/participantes", label: "Participantes", icon: <IconUsers className="h-4 w-4" /> },
       { href: "/admin/jurados", label: "Jurados", icon: <IconUser className="h-4 w-4" /> },

@@ -94,7 +94,3 @@ export type AdminInvite = {
   email: string;
   nombre: string;
 };
-
-export type ActionResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };

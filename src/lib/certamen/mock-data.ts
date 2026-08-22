@@ -84,10 +84,6 @@ export function getMockCalificaciones(): Calificacion[] {
   return mockCalificaciones;
 }
 
-export function setMockCalificaciones(data: Calificacion[]) {
-  mockCalificaciones = data;
-}
-
 export function upsertMockCalificacion(input: Omit<Calificacion, "id"> & { id?: string }): Calificacion {
   const existing = mockCalificaciones.find(
     (c) =>
