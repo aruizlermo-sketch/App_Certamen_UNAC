@@ -237,13 +237,23 @@ export async function updateJurado(
   const supabase = await createServerClient();
   const { data: existing } = await supabase
     .from("jurados")
-    .select("concurso_id")
+    .select("concurso_id, email, user_id")
     .eq("id", id)
     .single();
 
+  const prevEmail = existing?.email
+    ? String(existing.email).trim().toLowerCase()
+    : null;
+  const emailChanged = prevEmail !== email;
+
   const { error } = await supabase
     .from("jurados")
-    .update({ nombre: input.nombre, email, activo: input.activo })
+    .update({
+      nombre: input.nombre,
+      email,
+      activo: input.activo,
+      ...(emailChanged ? { user_id: null } : {}),
+    })
     .eq("id", id);
 
   if (error) return invalid(error.message);
@@ -258,6 +268,26 @@ export async function updateJurado(
   }
 
   return { ok: true };
+}
+
+export async function resetJuradoLink(id: string): Promise<Result> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+
+  if (!isSupabaseConfigured()) {
+    const item = mockJurados.find((j) => j.id === id);
+    if (!item) return invalid("Jurado no encontrado.");
+    item.userId = null;
+    return { ok: true };
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("jurados")
+    .update({ user_id: null })
+    .eq("id", id);
+
+  return error ? invalid(error.message) : { ok: true };
 }
 
 export async function deleteJurado(id: string): Promise<Result> {

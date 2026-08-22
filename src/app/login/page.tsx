@@ -4,7 +4,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import Link from "next/link";
 
 type LoginPageProps = {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
@@ -12,6 +12,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const nextPath =
     params.next && params.next.startsWith("/") ? params.next : "/";
   const authError = params.error ?? null;
+  const authEmail = params.email ?? null;
 
   return (
     <div className="min-h-screen bg-page-bg">
@@ -35,7 +36,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <div className="mx-auto -mt-8 max-w-md px-4 pb-10">
         <div className="rounded-lg border border-border bg-card p-8 shadow-[0_8px_32px_rgba(7,41,77,0.12)]">
           {isSupabaseConfigured() ? (
-            <LoginForm nextPath={nextPath} authError={authError} />
+            <LoginForm
+              nextPath={nextPath}
+              authError={authError}
+              authEmail={authEmail}
+            />
           ) : (
             <div className="space-y-4 text-center">
               <p className="text-sm text-text-muted">

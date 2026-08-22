@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import {
   createJuradoAction,
   deleteJuradoAction,
+  resetJuradoLinkAction,
   updateJuradoAction,
 } from "@/app/admin/actions";
 import type { CategoriaConCriterios, Jurado } from "@/types/certamen";
@@ -112,6 +113,25 @@ export function JuradosAdminClient({
       const result = await deleteJuradoAction(id);
       if (result.ok) {
         if (editingId === id) resetForm();
+        router.refresh();
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
+  function handleResetLink(id: string, nombre: string) {
+    if (
+      !confirm(
+        `Resetear vinculo de "${nombre}"? El jurado debera volver a entrar con Google o email para vincularse.`,
+      )
+    ) {
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await resetJuradoLinkAction(id);
+      if (result.ok) {
         router.refresh();
       } else {
         setError(result.error);
@@ -275,6 +295,16 @@ export function JuradosAdminClient({
                   <span className="text-sm text-text-muted">Sin categorias</span>
                 )}
               </div>
+              {j.userId ? (
+                <button
+                  type="button"
+                  onClick={() => handleResetLink(j.id, j.nombre)}
+                  className="mt-4 text-xs font-semibold text-text-muted underline-offset-2 hover:text-unac-blue hover:underline disabled:opacity-60"
+                  disabled={pending}
+                >
+                  Resetear vinculo de cuenta
+                </button>
+              ) : null}
             </div>
           );
         })}

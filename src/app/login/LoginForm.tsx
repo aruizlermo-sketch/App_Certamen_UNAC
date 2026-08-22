@@ -7,9 +7,10 @@ import { GoogleLoginButton } from "@/components/auth/GoogleLoginButton";
 type LoginFormProps = {
   nextPath: string;
   authError?: string | null;
+  authEmail?: string | null;
 };
 
-export function LoginForm({ nextPath, authError }: LoginFormProps) {
+export function LoginForm({ nextPath, authError, authEmail }: LoginFormProps) {
   const [state, action, pending] = useActionState<LoginState, FormData>(
     loginAction,
     {},
@@ -18,7 +19,9 @@ export function LoginForm({ nextPath, authError }: LoginFormProps) {
   const errorMessage =
     state.error ??
     (authError === "no-jurado"
-      ? "Tu cuenta de Google no esta vinculada a un jurado. Contacta al organizador."
+      ? authEmail
+        ? `La cuenta ${authEmail} no esta vinculada a un jurado activo. Pide al organizador que revise el email en Admin > Jurados o que resetee la vinculacion.`
+        : "Tu cuenta no esta vinculada a un jurado. Contacta al organizador."
       : authError === "auth"
         ? "No se pudo completar el inicio de sesion. Intenta de nuevo."
         : null);

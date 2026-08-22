@@ -1,17 +1,6 @@
--- Vinculacion de cuentas por email (ejecutar en Supabase SQL Editor)
-
-alter table jurados
-  add column if not exists email text;
-
-create unique index if not exists idx_jurados_email_unique
-  on jurados (lower(trim(email)))
-  where email is not null and trim(email) <> '';
-
-create table if not exists admin_invites (
-  email text primary key,
-  nombre text not null default '',
-  created_at timestamptz not null default now()
-);
+-- Fix: el email manda al vincular jurado (corrige user_id de otra cuenta)
+-- Ejecutar en Supabase SQL Editor si un jurado muestra "Cuenta vinculada"
+-- pero el usuario correcto no puede entrar.
 
 create or replace function public.link_user_by_email(p_user_id uuid, p_email text)
 returns void
@@ -31,6 +20,7 @@ begin
     return;
   end if;
 
+  -- El email configurado por admin es la fuente de verdad
   update jurados
   set user_id = p_user_id
   where lower(trim(email)) = v_email
@@ -61,18 +51,5 @@ begin
 end;
 $$;
 
-grant execute on function public.link_user_by_email(uuid, text) to authenticated;
-
--- RLS admin_invites
-alter table admin_invites enable row level security;
-
-drop policy if exists "admin_invites_admin_all" on admin_invites;
-create policy "admin_invites_admin_all" on admin_invites
-  for all to authenticated
-  using (is_admin())
-  with check (is_admin());
-
-drop policy if exists "admin_invites_select_own" on admin_invites;
-create policy "admin_invites_select_own" on admin_invites
-  for select to authenticated
-  using (lower(trim(email)) = lower(trim(auth.jwt() ->> 'email')));
+-- Opcional: resetear vinculo incorrecto de Jose para forzar re-login
+-- update jurados set user_id = null where lower(trim(email)) = 'jose1907040220@gmail.com';

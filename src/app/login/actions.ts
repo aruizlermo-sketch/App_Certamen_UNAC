@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { linkUserByEmail } from "@/lib/auth/link-account";
 import { createServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -25,10 +26,14 @@ export async function loginAction(
   }
 
   const supabase = await createServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (data.user) {
+    await linkUserByEmail(data.user.id, data.user.email);
   }
 
   redirect(next.startsWith("/") ? next : "/");

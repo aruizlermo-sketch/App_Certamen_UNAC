@@ -31,7 +31,10 @@ export async function GET(request: Request) {
 
   if (session.rol === "jurado" && !session.juradoId) {
     await supabase.auth.signOut();
-    return NextResponse.redirect(`${origin}/login?error=no-jurado`);
+    const emailParam = user?.email
+      ? `&email=${encodeURIComponent(user.email)}`
+      : "";
+    return NextResponse.redirect(`${origin}/login?error=no-jurado${emailParam}`);
   }
 
   const destination =

@@ -13,6 +13,7 @@ import {
   deleteCriterio,
   deleteJurado,
   deleteParticipante,
+  resetJuradoLink,
   updateCategoria,
   updateCriterio,
   updateJurado,
@@ -117,6 +118,15 @@ export async function deleteJuradoAction(id: string): Promise<ActionResult> {
   if (denied) return denied;
 
   const result = await deleteJurado(id);
+  if (result.ok) revalidateAdminPaths();
+  return result.ok ? { ok: true } : result;
+}
+
+export async function resetJuradoLinkAction(id: string): Promise<ActionResult> {
+  const denied = await guardAdmin();
+  if (denied) return denied;
+
+  const result = await resetJuradoLink(id);
   if (result.ok) revalidateAdminPaths();
   return result.ok ? { ok: true } : result;
 }
