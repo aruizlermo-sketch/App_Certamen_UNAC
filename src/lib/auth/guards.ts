@@ -21,7 +21,7 @@ export function canViewNotasJurados(session: AppSession): boolean {
   return session.rol === "admin" || session.esPresidente;
 }
 
-/** Imprimir / exportar PDF de resultados globales. */
+/** Descargar PDF de resultados globales. */
 export function canPrintResultados(session: AppSession): boolean {
   return session.rol === "admin" || session.esPresidente;
 }

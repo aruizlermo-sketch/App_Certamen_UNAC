@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PrintResultadosButton } from "@/components/resultados/PrintResultadosButton";
+import { DownloadResultadosPdfButton } from "@/components/resultados/DownloadResultadosPdfButton";
 import { ResultadosView } from "@/components/resultados/ResultadosView";
 import {
   canPrintResultados,
@@ -11,7 +11,7 @@ export default async function ResultadosPage() {
   const session = await requireResultadosAccess();
   const resultados = await getResultados();
   const isJurado = session.rol === "jurado";
-  const canPrint = canPrintResultados(session);
+  const canDownloadPdf = canPrintResultados(session);
 
   if (!resultados) {
     return (
@@ -27,15 +27,15 @@ export default async function ResultadosPage() {
   return (
     <div className="space-y-6">
       {isJurado ? (
-        <div className="info-banner no-print">
+        <div className="info-banner">
           <strong>Vista de jurado:</strong> rankings del certamen en solo lectura.
           {session.esPresidente
-            ? " Como presidente puedes imprimir el acta en PDF."
+            ? " Como presidente puedes descargar el acta en PDF."
             : " Tus notas se editan solo desde Calificar."}
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 no-print">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="section-heading">
           <p className="section-eyebrow">Resultados en vivo</p>
           <h2 className="section-title">{resultados.concurso.nombre}</h2>
@@ -49,16 +49,10 @@ export default async function ResultadosPage() {
               Notas por jurado
             </Link>
           ) : null}
-          {canPrint ? <PrintResultadosButton /> : null}
+          {canDownloadPdf ? (
+            <DownloadResultadosPdfButton resultados={resultados} />
+          ) : null}
         </div>
-      </div>
-
-      <div className="print-only mb-6 text-center">
-        <p className="text-xs uppercase tracking-widest text-text-muted">
-          Universidad Nacional del Callao
-        </p>
-        <h1 className="mt-2 text-2xl font-bold">{resultados.concurso.nombre}</h1>
-        <p className="mt-1 text-sm text-text-muted">Acta de resultados — {new Date().toLocaleDateString("es-PE")}</p>
       </div>
 
       <ResultadosView resultados={resultados} readOnly={isJurado} />
