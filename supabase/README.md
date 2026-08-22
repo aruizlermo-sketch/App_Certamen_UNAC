@@ -45,3 +45,6 @@ Luego el jurado vuelve a iniciar sesion.
 
 - **No ejecutar solo `schema.sql` en produccion** sin `policies.sql`: las tablas quedan sin politicas utiles.
 - El rol admin **solo** se asigna via `admin_invites` + `link_user_by_email`, no via metadata de signup.
+- En **Supabase → Authentication → Providers**: dejar habilitado solo **Google**; desactivar email/contrasena si no se usa.
+- En **Authentication → Settings**: desactivar registro publico si no es necesario (`Enable signup` off).
+- La app muestra un **mensaje generico** si el usuario no tiene acceso (no revela si falta vinculo, rol, etc.).

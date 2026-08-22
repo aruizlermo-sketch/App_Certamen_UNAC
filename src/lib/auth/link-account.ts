@@ -9,12 +9,8 @@ export async function linkUserByEmail(
   if (!isSupabaseConfigured() || !email?.trim()) return;
 
   const supabase = await createServerClient();
-  const { error } = await supabase.rpc("link_user_by_email", {
+  await supabase.rpc("link_user_by_email", {
     p_user_id: userId,
     p_email: email.trim(),
   });
-
-  if (error) {
-    console.error("link_user_by_email:", error.message);
-  }
 }

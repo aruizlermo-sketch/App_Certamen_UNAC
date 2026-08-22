@@ -1,19 +1,18 @@
 import { LoginForm } from "@/app/login/LoginForm";
 import { BrandLogo } from "@/components/brand/BrandMark";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { hasLoginError, safeNextPath } from "@/lib/auth/messages";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import Link from "next/link";
 
 type LoginPageProps = {
-  searchParams: Promise<{ next?: string; error?: string; email?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const nextPath =
-    params.next && params.next.startsWith("/") ? params.next : "/";
-  const authError = params.error ?? null;
-  const authEmail = params.email ?? null;
+  const nextPath = safeNextPath(params.next);
+  const showAccessDenied = hasLoginError(params.error);
 
   return (
     <div className="min-h-screen bg-page-bg">
@@ -42,8 +41,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {isSupabaseConfigured() ? (
             <LoginForm
               nextPath={nextPath}
-              authError={authError}
-              authEmail={authEmail}
+              showAccessDenied={showAccessDenied}
             />
           ) : (
             <div className="space-y-4 text-center">

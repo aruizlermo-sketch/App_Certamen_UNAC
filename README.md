@@ -32,8 +32,9 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```
 
-4. Primer admin: **Admin → Accesos** → agregar email → entrar con Google o email/contrasena
-5. Jurados: **Admin → Jurados** → email de acceso → el jurado entra con ese correo
+4. Primer admin: **Admin → Accesos** → agregar email → entrar con **Google**
+5. Jurados: **Admin → Jurados** → email de acceso → el jurado entra con Google
+6. Supabase: desactivar login email/contrasena; habilitar solo Google OAuth
 
 Ver `supabase/README.md` para migraciones y troubleshooting.
 

@@ -1,48 +1,41 @@
 import { NextResponse } from "next/server";
 import { getAppSession } from "@/lib/auth/session";
-import { linkUserByEmail } from "@/lib/auth/link-account";
+import { safeNextPath } from "@/lib/auth/messages";
 import { createServerClient } from "@/lib/supabase/server";
+
+function accessDeniedRedirect(origin: string) {
+  return NextResponse.redirect(`${origin}/login?error=1`);
+}
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  const next = safeNextPath(searchParams.get("next"));
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=auth`);
+    return accessDeniedRedirect(origin);
   }
 
   const supabase = await createServerClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=auth`);
-  }
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    await linkUserByEmail(user.id, user.email);
+    return accessDeniedRedirect(origin);
   }
 
   const session = await getAppSession();
 
-  if (session.rol === "jurado" && !session.juradoId) {
+  const hasAccess =
+    session.rol === "admin" ||
+    (session.rol === "jurado" && Boolean(session.juradoId));
+
+  if (!hasAccess) {
     await supabase.auth.signOut();
-    const emailParam = user?.email
-      ? `&email=${encodeURIComponent(user.email)}`
-      : "";
-    return NextResponse.redirect(`${origin}/login?error=no-jurado${emailParam}`);
+    return accessDeniedRedirect(origin);
   }
 
   const destination =
-    session.rol === "jurado"
-      ? "/jurado"
-      : next.startsWith("/")
-        ? next
-        : "/";
+    session.rol === "jurado" ? "/jurado" : next;
 
   const forwardedHost = request.headers.get("x-forwarded-host");
   const isLocal = process.env.NODE_ENV === "development";

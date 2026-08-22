@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createBrowserClient } from "@/lib/supabase/client";
+import { ACCESS_DENIED_MESSAGE } from "@/lib/auth/messages";
 
 type GoogleLoginButtonProps = {
   nextPath: string;
@@ -9,11 +10,11 @@ type GoogleLoginButtonProps = {
 
 export function GoogleLoginButton({ nextPath }: GoogleLoginButtonProps) {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   async function handleGoogleLogin() {
     setLoading(true);
-    setError(null);
+    setError(false);
 
     try {
       const supabase = createBrowserClient();
@@ -25,17 +26,17 @@ export function GoogleLoginButton({ nextPath }: GoogleLoginButtonProps) {
           redirectTo,
           queryParams: {
             access_type: "offline",
-            prompt: "consent",
+            prompt: "select_account",
           },
         },
       });
 
       if (oauthError) {
-        setError(oauthError.message);
+        setError(true);
         setLoading(false);
       }
     } catch {
-      setError("No se pudo iniciar sesion con Google.");
+      setError(true);
       setLoading(false);
     }
   }
@@ -71,7 +72,7 @@ export function GoogleLoginButton({ nextPath }: GoogleLoginButtonProps) {
 
       {error ? (
         <p className="rounded-xl bg-coral-soft px-3 py-2 text-sm text-coral">
-          {error}
+          {ACCESS_DENIED_MESSAGE}
         </p>
       ) : null}
     </div>
