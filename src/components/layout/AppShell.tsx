@@ -96,21 +96,32 @@ function buildJuradoNav(esPresidente: boolean): NavGroup[] {
   ];
 }
 
-function isActive(pathname: string, href: string) {
+function isActive(pathname: string, href: string, allHrefs: string[]) {
   if (href === "/") return pathname === "/";
-  return pathname.startsWith(href);
+  if (!pathname.startsWith(href)) return false;
+
+  const hasMoreSpecificMatch = allHrefs.some(
+    (other) =>
+      other !== href &&
+      other.startsWith(`${href}/`) &&
+      pathname.startsWith(other),
+  );
+
+  return !hasMoreSpecificMatch;
 }
 
 function NavLink({
   item,
   pathname,
+  allHrefs,
   onNavigate,
 }: {
   item: NavItem;
   pathname: string;
+  allHrefs: string[];
   onNavigate: () => void;
 }) {
-  const active = isActive(pathname, item.href);
+  const active = isActive(pathname, item.href, allHrefs);
 
   return (
     <Link
@@ -157,6 +168,7 @@ export function AppShell({
   const [open, setOpen] = useState(false);
   const isJurado = userRol === "jurado";
   const navGroups = isJurado ? buildJuradoNav(esPresidente) : adminNavGroups;
+  const allNavHrefs = navGroups.flatMap((group) => group.items.map((item) => item.href));
 
   return (
     <div className="min-h-full bg-page-bg">
@@ -192,6 +204,7 @@ export function AppShell({
               <NavLink
                 item={topItem}
                 pathname={pathname}
+                allHrefs={[topItem.href, ...allNavHrefs]}
                 onNavigate={() => setOpen(false)}
               />
             ) : null}
@@ -207,6 +220,7 @@ export function AppShell({
                       key={item.href}
                       item={item}
                       pathname={pathname}
+                      allHrefs={allNavHrefs}
                       onNavigate={() => setOpen(false)}
                     />
                   ))}
