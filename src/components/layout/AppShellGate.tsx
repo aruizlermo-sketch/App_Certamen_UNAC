@@ -10,9 +10,15 @@ type AppShellGateProps = {
   children: ReactNode;
   userEmail?: string | null;
   userRol?: UserRol;
+  esPresidente?: boolean;
 };
 
-export function AppShellGate({ children, userEmail, userRol = "admin" }: AppShellGateProps) {
+export function AppShellGate({
+  children,
+  userEmail,
+  userRol = "admin",
+  esPresidente = false,
+}: AppShellGateProps) {
   const pathname = usePathname();
 
   if (pathname === "/login") {
@@ -20,7 +26,11 @@ export function AppShellGate({ children, userEmail, userRol = "admin" }: AppShel
   }
 
   return (
-    <AppShell userEmail={userEmail} userRol={userRol}>
+    <AppShell
+      userEmail={userEmail}
+      userRol={userRol}
+      esPresidente={esPresidente}
+    >
       {children}
     </AppShell>
   );

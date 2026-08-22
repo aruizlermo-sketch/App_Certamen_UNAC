@@ -86,6 +86,7 @@ export async function createJuradoAction(formData: FormData): Promise<ActionResu
     nombre: String(formData.get("nombre") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim() || null,
     activo: formData.get("activo") !== "false",
+    esPresidente: formData.get("esPresidente") === "true",
     categoriaIds,
   });
 
@@ -103,6 +104,7 @@ export async function updateJuradoAction(formData: FormData): Promise<ActionResu
     nombre: String(formData.get("nombre") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim() || null,
     activo: formData.get("activo") !== "false",
+    esPresidente: formData.get("esPresidente") === "true",
     categoriaIds,
   });
 

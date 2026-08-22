@@ -11,6 +11,7 @@ export type AppSession = {
   rol: UserRol;
   juradoId: string | null;
   juradoNombre: string | null;
+  esPresidente: boolean;
   isDemo: boolean;
 };
 
@@ -20,6 +21,7 @@ const demoSession: AppSession = {
   rol: "admin",
   juradoId: null,
   juradoNombre: null,
+  esPresidente: false,
   isDemo: true,
 };
 
@@ -40,6 +42,7 @@ export async function getAppSession(): Promise<AppSession> {
       rol: "jurado",
       juradoId: null,
       juradoNombre: null,
+      esPresidente: false,
       isDemo: false,
     };
   }
@@ -61,13 +64,14 @@ export async function getAppSession(): Promise<AppSession> {
       rol: "admin",
       juradoId: null,
       juradoNombre: profile?.nombre ? String(profile.nombre) : null,
+      esPresidente: false,
       isDemo: false,
     };
   }
 
   const { data: jurado } = await supabase
     .from("jurados")
-    .select("id, nombre")
+    .select("id, nombre, es_presidente")
     .eq("user_id", user.id)
     .eq("activo", true)
     .maybeSingle();
@@ -78,6 +82,7 @@ export async function getAppSession(): Promise<AppSession> {
     rol: "jurado",
     juradoId: jurado ? String(jurado.id) : null,
     juradoNombre: jurado ? String(jurado.nombre) : null,
+    esPresidente: jurado ? Boolean(jurado.es_presidente) : false,
     isDemo: false,
   };
 }
@@ -116,6 +121,16 @@ export async function requireJurado(): Promise<AppSession> {
   return session;
 }
 
+export async function requireResultadosAccess(): Promise<AppSession> {
+  const session = await requireAuth();
+
+  if (!canViewResultados(session)) {
+    redirect(session.juradoId ? "/jurado" : "/login");
+  }
+
+  return session;
+}
+
 /** En demo, simula sesión de un jurado concreto. */
 export function demoJuradoSession(juradoId: string): AppSession {
   const jurado = mockJurados.find((j) => j.id === juradoId);
@@ -124,6 +139,7 @@ export function demoJuradoSession(juradoId: string): AppSession {
     rol: "jurado",
     juradoId,
     juradoNombre: jurado?.nombre ?? null,
+    esPresidente: jurado?.esPresidente ?? false,
   };
 }
 
@@ -132,7 +148,7 @@ export function isAdmin(session: AppSession): boolean {
 }
 
 export function canViewResultados(session: AppSession): boolean {
-  return session.rol === "admin";
+  return session.rol === "admin" || session.esPresidente;
 }
 
 export function canAccessAdmin(session: AppSession): boolean {

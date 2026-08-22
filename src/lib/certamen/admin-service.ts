@@ -114,11 +114,44 @@ async function syncJuradoCategorias(juradoId: string, categoriaIds: string[]) {
   if (error) throw new Error(error.message);
 }
 
+async function syncPresidente(
+  concursoId: string,
+  juradoId: string,
+  esPresidente: boolean,
+) {
+  if (!isSupabaseConfigured()) {
+    for (const j of mockJurados) {
+      if (j.concursoId === concursoId) {
+        j.esPresidente = esPresidente && j.id === juradoId;
+      }
+    }
+    return;
+  }
+
+  const supabase = await createServerClient();
+  if (esPresidente) {
+    await supabase
+      .from("jurados")
+      .update({ es_presidente: false })
+      .eq("concurso_id", concursoId);
+    await supabase
+      .from("jurados")
+      .update({ es_presidente: true })
+      .eq("id", juradoId);
+  } else {
+    await supabase
+      .from("jurados")
+      .update({ es_presidente: false })
+      .eq("id", juradoId);
+  }
+}
+
 export async function createJurado(input: {
   concursoId: string;
   nombre: string;
   email: string | null;
   activo: boolean;
+  esPresidente: boolean;
   categoriaIds: string[];
 }): Promise<Result> {
   const denied = await assertAdmin();
@@ -134,11 +167,13 @@ export async function createJurado(input: {
       nombre: input.nombre,
       email,
       userId: null,
+      esPresidente: false,
       activo: input.activo,
     });
     for (const categoriaId of input.categoriaIds) {
       mockJuradoCategorias.push({ juradoId: id, categoriaId });
     }
+    await syncPresidente(input.concursoId || MOCK_CONCURSO_ID, id, input.esPresidente);
     return { ok: true };
   }
 
@@ -158,6 +193,7 @@ export async function createJurado(input: {
 
   try {
     await syncJuradoCategorias(String(data.id), input.categoriaIds);
+    await syncPresidente(input.concursoId, String(data.id), input.esPresidente);
   } catch (e) {
     return invalid(e instanceof Error ? e.message : "Error al asignar categorias.");
   }
@@ -171,6 +207,7 @@ export async function updateJurado(
     nombre: string;
     email: string | null;
     activo: boolean;
+    esPresidente: boolean;
     categoriaIds: string[];
   },
 ): Promise<Result> {
@@ -193,10 +230,17 @@ export async function updateJurado(
     for (const categoriaId of input.categoriaIds) {
       mockJuradoCategorias.push({ juradoId: id, categoriaId });
     }
+    await syncPresidente(item.concursoId, id, input.esPresidente);
     return { ok: true };
   }
 
   const supabase = await createServerClient();
+  const { data: existing } = await supabase
+    .from("jurados")
+    .select("concurso_id")
+    .eq("id", id)
+    .single();
+
   const { error } = await supabase
     .from("jurados")
     .update({ nombre: input.nombre, email, activo: input.activo })
@@ -206,6 +250,9 @@ export async function updateJurado(
 
   try {
     await syncJuradoCategorias(id, input.categoriaIds);
+    if (existing?.concurso_id) {
+      await syncPresidente(String(existing.concurso_id), id, input.esPresidente);
+    }
   } catch (e) {
     return invalid(e instanceof Error ? e.message : "Error al asignar categorias.");
   }

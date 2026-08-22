@@ -2,16 +2,23 @@ import type { ResultadosConcurso } from "@/types/certamen";
 
 type ResultadosViewProps = {
   resultados: ResultadosConcurso;
+  readOnly?: boolean;
 };
 
-export function ResultadosView({ resultados }: ResultadosViewProps) {
+export function ResultadosView({ resultados, readOnly = false }: ResultadosViewProps) {
   const { concurso, rankingGeneral, porCategoria } = resultados;
 
   return (
     <div className="space-y-8">
+      {readOnly ? (
+        <p className="text-sm text-text-muted">
+          Rankings calculados en tiempo real. No puedes modificar notas desde aqui.
+        </p>
+      ) : null}
+
       <div className="section-heading">
-        <p className="section-eyebrow">Resultados en vivo</p>
-        <h1 className="section-title">{concurso.nombre}</h1>
+        <p className="section-eyebrow">Tabla general</p>
+        <h1 className="sr-only">{concurso.nombre}</h1>
       </div>
 
       {/* Resumen general */}

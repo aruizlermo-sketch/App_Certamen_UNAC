@@ -72,6 +72,7 @@ create table if not exists jurados (
   nombre text not null,
   email text,
   user_id uuid references auth.users (id) on delete set null,
+  es_presidente boolean not null default false,
   activo boolean not null default true,
   created_at timestamptz not null default now()
 );

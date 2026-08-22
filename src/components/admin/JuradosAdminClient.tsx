@@ -19,6 +19,7 @@ type FormState = {
   nombre: string;
   email: string;
   activo: boolean;
+  esPresidente: boolean;
   categoriaIds: string[];
 };
 
@@ -38,13 +39,16 @@ export function JuradosAdminClient({
     nombre: "",
     email: "",
     activo: true,
+    esPresidente: false,
     categoriaIds: [],
   });
   const [error, setError] = useState<string | null>(null);
 
+  const presidenteActual = jurados.find((j) => j.esPresidente);
+
   function resetForm() {
     setEditingId(null);
-    setForm({ nombre: "", email: "", activo: true, categoriaIds: [] });
+    setForm({ nombre: "", email: "", activo: true, esPresidente: false, categoriaIds: [] });
     setError(null);
   }
 
@@ -55,6 +59,7 @@ export function JuradosAdminClient({
       nombre: j.nombre,
       email: j.email ?? "",
       activo: j.activo,
+      esPresidente: j.esPresidente,
       categoriaIds: cat.map((c) => c.id),
     });
     setError(null);
@@ -74,6 +79,7 @@ export function JuradosAdminClient({
     fd.set("nombre", form.nombre);
     fd.set("email", form.email);
     fd.set("activo", form.activo ? "true" : "false");
+    fd.set("esPresidente", form.esPresidente ? "true" : "false");
     for (const id of form.categoriaIds) {
       fd.append("categoriaIds", id);
     }
@@ -156,6 +162,20 @@ export function JuradosAdminClient({
           />
           Jurado activo
         </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={form.esPresidente}
+            onChange={(e) => setForm((f) => ({ ...f, esPresidente: e.target.checked }))}
+            className="h-4 w-4 rounded border-border"
+          />
+          Presidente del jurado (solo uno por concurso)
+        </label>
+        {form.esPresidente && presidenteActual && presidenteActual.id !== editingId ? (
+          <p className="text-xs text-amber-900 rounded-lg bg-amber-soft px-3 py-2">
+            Reemplazara a <strong>{presidenteActual.nombre}</strong> como presidente.
+          </p>
+        ) : null}
         <div>
           <p className="text-label">Categorias asignadas</p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -217,6 +237,11 @@ export function JuradosAdminClient({
                     >
                       {j.userId ? "Cuenta vinculada" : "Sin vincular"}
                     </span>
+                    {j.esPresidente ? (
+                      <span className="status-pill bg-brand-soft text-unac-navy-dark">
+                        Presidente
+                      </span>
+                    ) : null}
                   </div>
                 </div>
                 <div className="flex gap-2">

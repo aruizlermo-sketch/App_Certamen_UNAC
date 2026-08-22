@@ -39,14 +39,25 @@ export function assertJuradoOwnsCategory(
   return { ok: false, error: "Criterio no valido." };
 }
 
+export function canViewAllCalificaciones(session: AppSession): boolean {
+  return session.rol === "admin" || session.esPresidente;
+}
+
 export function filterCalificacionesForSession<
   T extends { juradoId: string },
->(items: T[], session: AppSession, activeJuradoId?: string): T[] {
-  if (session.isDemo && activeJuradoId) {
-    return items.filter((c) => c.juradoId === activeJuradoId);
+>(
+  items: T[],
+  session: AppSession,
+  options?: { forJuradoId?: string; viewAll?: boolean },
+): T[] {
+  if (session.isDemo && options?.forJuradoId) {
+    return items.filter((c) => c.juradoId === options.forJuradoId);
   }
 
-  if (session.rol === "admin") {
+  if (canViewAllCalificaciones(session) && options?.viewAll) {
+    if (options.forJuradoId) {
+      return items.filter((c) => c.juradoId === options.forJuradoId);
+    }
     return items;
   }
 

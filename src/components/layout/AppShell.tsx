@@ -22,6 +22,7 @@ type AppShellProps = {
   children: ReactNode;
   userEmail?: string | null;
   userRol?: UserRol;
+  esPresidente?: boolean;
 };
 
 type NavItem = {
@@ -70,6 +71,21 @@ const juradoNavGroups: NavGroup[] = [
   },
 ];
 
+const presidenteExtraItems: NavItem[] = [
+  { href: "/resultados", label: "Resultados", icon: <IconTrophy className="h-4 w-4" /> },
+  { href: "/resultados/notas", label: "Notas jurados", icon: <IconChart className="h-4 w-4" /> },
+];
+
+function buildJuradoNav(esPresidente: boolean): NavGroup[] {
+  if (!esPresidente) return juradoNavGroups;
+  return [
+    {
+      title: "Concurso",
+      items: [...juradoNavGroups[0].items, ...presidenteExtraItems],
+    },
+  ];
+}
+
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname.startsWith(href);
@@ -116,15 +132,21 @@ function pageTitle(pathname: string) {
   if (pathname.startsWith("/admin/categorias")) return "Categorias";
   if (pathname.startsWith("/admin")) return "Configuracion";
   if (pathname.startsWith("/jurado")) return "Calificacion";
+  if (pathname.startsWith("/resultados/notas")) return "Notas jurados";
   if (pathname.startsWith("/resultados")) return "Resultados";
   return "Certamen UNAC";
 }
 
-export function AppShell({ children, userEmail, userRol = "admin" }: AppShellProps) {
+export function AppShell({
+  children,
+  userEmail,
+  userRol = "admin",
+  esPresidente = false,
+}: AppShellProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isJurado = userRol === "jurado";
-  const navGroups = isJurado ? juradoNavGroups : adminNavGroups;
+  const navGroups = isJurado ? buildJuradoNav(esPresidente) : adminNavGroups;
 
   return (
     <div className="min-h-full bg-page-bg">
@@ -189,6 +211,7 @@ export function AppShell({ children, userEmail, userRol = "admin" }: AppShellPro
                 <IconUser className="h-4 w-4 shrink-0" />
                 <p className="truncate" title={userEmail}>
                   {userEmail}
+                  {esPresidente ? " · Presidente" : ""}
                 </p>
               </div>
             ) : null}

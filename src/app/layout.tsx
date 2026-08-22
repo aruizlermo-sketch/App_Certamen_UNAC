@@ -25,24 +25,31 @@ export default async function RootLayout({
 }>) {
   let userEmail: string | null = null;
   let userRol: "admin" | "jurado" = "admin";
+  let esPresidente = false;
 
   if (isSupabaseConfigured()) {
     try {
       const session = await getAppSession();
       userEmail = session.email;
       userRol = session.rol;
+      esPresidente = session.esPresidente;
     } catch {
       userEmail = null;
     }
   } else {
     const session = await getAppSession();
     userRol = session.rol;
+    esPresidente = session.esPresidente;
   }
 
   return (
     <html lang="es" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full bg-page-bg font-sans">
-        <AppShellGate userEmail={userEmail} userRol={userRol}>
+        <AppShellGate
+          userEmail={userEmail}
+          userRol={userRol}
+          esPresidente={esPresidente}
+        >
           {children}
         </AppShellGate>
       </body>

@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase/server";
 import { getAppSession } from "@/lib/auth/session";
 import {
   assertJuradoOwnsCategory,
+  canViewAllCalificaciones,
   filterCalificacionesForSession,
   resolveJuradoIdForSave,
 } from "@/lib/auth/permissions";
@@ -125,6 +126,7 @@ export async function getConcursoCompleto(
       nombre: String(j.nombre),
       email: j.email ? String(j.email) : null,
       userId: j.user_id ? String(j.user_id) : null,
+      esPresidente: Boolean(j.es_presidente),
       activo: Boolean(j.activo),
     })),
     juradoCatsFiltered.map((jc) => ({
@@ -136,16 +138,17 @@ export async function getConcursoCompleto(
 
 export async function getCalificaciones(
   concursoId?: string,
-  options?: { forJuradoId?: string },
+  options?: { forJuradoId?: string; viewAll?: boolean },
 ): Promise<Calificacion[]> {
   const id = concursoId ?? mockConcurso.id;
   const session = await getAppSession();
+  const viewAll = options?.viewAll && canViewAllCalificaciones(session);
 
   if (!isSupabaseConfigured()) {
     return filterCalificacionesForSession(
       getMockCalificaciones(),
       session,
-      options?.forJuradoId,
+      { forJuradoId: options?.forJuradoId, viewAll },
     );
   }
 
@@ -162,8 +165,10 @@ export async function getCalificaciones(
     .select("*")
     .in("categoria_criterio_id", criterioIds);
 
-  if (session.rol === "jurado" && session.juradoId) {
+  if (!viewAll && session.rol === "jurado" && session.juradoId) {
     query = query.eq("jurado_id", session.juradoId);
+  } else if (options?.forJuradoId) {
+    query = query.eq("jurado_id", options.forJuradoId);
   }
 
   const { data } = await query;
@@ -176,14 +181,14 @@ export async function getResultados(
 ): Promise<ResultadosConcurso | null> {
   const session = await getAppSession();
 
-  if (session.rol !== "admin") {
+  if (session.rol !== "admin" && !session.esPresidente) {
     return null;
   }
 
   const concurso = await getConcursoCompleto(concursoId);
   if (!concurso) return null;
 
-  const calificaciones = await getCalificaciones(concurso.id);
+  const calificaciones = await getCalificaciones(concurso.id, { viewAll: true });
 
   const categorias = concurso.categorias.map(({ criterios: _, jurados: __, ...cat }) => cat);
   const criterios = concurso.categorias.flatMap((c) => c.criterios);
@@ -249,6 +254,10 @@ export async function saveCalificacion(input: {
 
   if (session.rol === "jurado" && session.juradoId !== juradoId) {
     return { ok: false, error: "No puedes calificar como otro jurado." };
+  }
+
+  if (session.esPresidente && session.juradoId !== juradoId) {
+    return { ok: false, error: "Como presidente solo puedes editar tus propias notas." };
   }
 
   const supabase = await createServerClient();

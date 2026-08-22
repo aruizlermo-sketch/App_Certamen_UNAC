@@ -41,6 +41,7 @@ export type Jurado = {
   nombre: string;
   email: string | null;
   userId: string | null;
+  esPresidente: boolean;
   activo: boolean;
 };
 

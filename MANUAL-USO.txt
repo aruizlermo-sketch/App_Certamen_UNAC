@@ -1,0 +1,378 @@
+================================================================================
+  CERTAMEN UNAC — SISTEMA DE CALIFICACION
+  Manual de uso, funcionalidades y limitaciones
+  Version: Agosto 2026
+================================================================================
+
+1. DESCRIPCION GENERAL
+--------------------------------------------------------------------------------
+
+Aplicacion web para gestionar y calcular las calificaciones del Certamen de
+Tunas Universitarias (UNAC). Permite:
+
+  - Configurar concurso, participantes (tunas), jurados y categorias
+  - Registrar notas por criterio desde dispositivos moviles o PC
+  - Calcular rankings por categoria y puntaje general en tiempo real
+  - Control de acceso por roles (administrador / jurado)
+
+Proyecto pensado para replicar la logica de un Excel de calificacion del
+Certamen UNAC 2026, con reglas de ponderacion configurables.
+
+
+2. ENLACES Y DESPLIEGUE
+--------------------------------------------------------------------------------
+
+  Produccion (Vercel):  https://app-certamen-unac.vercel.app
+  Repositorio GitHub:   https://github.com/aruizlermo-sketch/App_Certamen_UNAC
+  Supabase (proyecto):  exgjwreqrqqmvsvvezxa
+                        https://exgjwreqrqqmvsvvezxa.supabase.co
+
+  Desarrollo local:
+    - Puerto: 3001  (App Droopy usa 3000)
+    - Comando: npm run dev
+    - URL:     http://localhost:3001
+
+  Variables de entorno (Vercel / .env.local):
+    NEXT_PUBLIC_SUPABASE_URL=https://exgjwreqrqqmvsvvezxa.supabase.co
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=...   (o NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+
+
+3. ROLES DE USUARIO
+--------------------------------------------------------------------------------
+
+  ADMINISTRADOR (admin)
+  ---------------------
+  - Ve dashboard con KPIs y top 3 general
+  - Accede a configuracion del concurso
+  - CRUD de participantes, jurados, categorias y criterios
+  - Gestiona accesos por email (invitar admins, asignar email a jurados)
+  - Ve resultados completos
+  - Puede calificar en vista general (elige cualquier jurado y edita sus notas)
+
+  JURADO (jurado)
+  ---------------
+  - Solo ve la pantalla de calificacion (/jurado)
+  - Solo puede calificar en las categorias que tiene asignadas
+  - Solo ve y edita SUS propias notas (no las de otros jurados)
+  - No accede a resultados ni configuracion
+
+  MODO DEMO (sin Supabase configurado)
+  ------------------------------------
+  - Entra directo sin login real
+  - Datos en memoria (mock-data.ts)
+  - Simula jurado con selector desplegable
+  - Las calificaciones no persisten al reiniciar el servidor
+
+
+4. AUTENTICACION
+--------------------------------------------------------------------------------
+
+  Metodos de login:
+    1. Continuar con Google (OAuth via Supabase)
+    2. Email + contrasena (usuarios creados en Supabase Auth)
+
+  Flujo Google:
+    Login -> Google -> Supabase -> /auth/callback -> redireccion segun rol
+
+  Vinculacion por EMAIL (sin copiar UUID manual):
+    - JURADO: en Consultas > Jurados, campo "Email de acceso"
+    - ADMIN:  en Consultas > Accesos, agregar correo del administrador
+    - Al primer login con ese correo, la app vincula la cuenta automaticamente
+    - Requiere ejecutar supabase/link-by-email.sql en Supabase
+
+  Configuracion Supabase Auth (URL Configuration):
+    Site URL:      https://app-certamen-unac.vercel.app
+    Redirect URLs:
+      https://app-certamen-unac.vercel.app/**
+      https://app-certamen-unac.vercel.app/auth/callback
+      http://localhost:3001/**
+      http://localhost:3001/auth/callback
+
+  Google Cloud OAuth:
+    Redirect URI autorizada (solo Supabase, NO Vercel):
+      https://exgjwreqrqqmvsvvezxa.supabase.co/auth/v1/callback
+
+  Errores comunes de login:
+    - "Tu cuenta no esta vinculada a un jurado"
+      -> Falta email en jurados o el correo no coincide
+    - Redireccion a localhost:3000
+      -> Site URL incorrecta en Supabase (debe ser Vercel o :3001)
+    - Google OAuth en modo Prueba
+      -> Solo usuarios de prueba en Google Cloud pueden entrar
+
+
+5. NAVEGACION Y PANTALLAS
+--------------------------------------------------------------------------------
+
+  RUTAS PUBLICAS / PROTEGIDAS
+  ---------------------------
+  /login              Login (Google o email)
+  /                   Dashboard (solo admin; jurado redirige a /jurado)
+  /jurado             Calificacion
+  /resultados         Rankings (solo admin)
+  /admin              Resumen configuracion
+  /admin/participantes  CRUD tunas participantes
+  /admin/jurados        CRUD jurados + email + categorias asignadas
+  /admin/categorias     CRUD categorias + criterios
+  /admin/usuarios       Invitar administradores por email
+  /auth/callback        Callback OAuth (automatico)
+
+  MENU LATERAL — ADMIN
+  --------------------
+  Inicio
+  Concurso:
+    - Configuracion
+    - Calificar (vista general por jurado)
+    - Resultados
+  Consultas:
+    - Participantes
+    - Jurados
+    - Accesos
+    - Categorias
+
+  MENU LATERAL — JURADO
+  ---------------------
+  Concurso:
+    - Calificar
+
+
+6. MANUAL DE USO — ADMINISTRADOR
+--------------------------------------------------------------------------------
+
+  6.1 PARTICIPANTES (/admin/participantes)
+  -----------------------------------------
+  - Crear: nombre de la tuna + numero de orden
+  - Editar: modificar nombre u orden
+  - Eliminar: borra participante y sus calificaciones (pide confirmacion)
+
+  6.2 JURADOS (/admin/jurados)
+  ----------------------------
+  - Crear: nombre, email de acceso, activo/inactivo, categorias asignadas
+  - Editar: mismos campos
+  - Eliminar: borra jurado y calificaciones asociadas
+  - Estados visibles:
+      "Sin vincular"     -> aun no ha iniciado sesion con ese email
+      "Cuenta vinculada" -> ya entro con Google/email y quedo enlazado
+
+  6.3 CATEGORIAS (/admin/categorias)
+  ----------------------------------
+  - Crear categoria: nombre, descripcion, peso total (0-1), orden
+  - Editar / eliminar categoria
+  - Por cada categoria, gestionar CRITERIOS:
+      nombre, descripcion, peso (0-1), orden
+  - Ver jurados asignados (solo lectura; se asignan desde Jurados)
+
+  6.4 ACCESOS (/admin/usuarios)
+  -----------------------------
+  - Agregar email de futuro administrador
+  - Al primer login, recibe rol admin automaticamente
+  - Eliminar invitacion pendiente si ya no aplica
+
+  6.5 CALIFICAR COMO ADMIN (/jurado)
+  ----------------------------------
+  - Selector de jurado (botones)
+  - Misma interfaz que un jurado real
+  - Util para revisar, corregir o ingresar notas en nombre de un jurado
+
+  6.6 RESULTADOS (/resultados)
+  ----------------------------
+  - Ranking general de tunas
+  - Ranking por cada categoria
+  - Desglose de puntajes y criterios
+
+
+7. MANUAL DE USO — JURADO
+--------------------------------------------------------------------------------
+
+  Paso 1: Iniciar sesion con Google o email/contrasena
+  Paso 2: Ir a Calificar (/jurado)
+  Paso 3: Elegir TUNA PARTICIPANTE (botones)
+  Paso 4: Elegir CATEGORIA (solo las asignadas a ese jurado)
+  Paso 5: Por cada criterio, seleccionar nota del 1 al 10 (incrementos 0.5)
+  Paso 6: Pulsar GUARDAR (las notas NO se guardan solas al tocarlas)
+
+  Notas:
+    - Puede guardar notas parciales (no es obligatorio completar los 3 criterios)
+    - Puede volver a editar y guardar de nuevo (sobreescribe)
+    - Solo ve categorias donde fue asignado como jurado
+
+
+8. REGLAS DE PUNTUACION
+--------------------------------------------------------------------------------
+
+  Escala por criterio: 1 a 10 (pasos de 0.5)
+
+  Por CRITERIO dentro de una categoria:
+    - Se toma el PROMEDIO de las notas de todos los jurados asignados
+    - Se multiplica por el PESO del criterio (ej. 40%, 30%, 30%)
+    - Suma de contribuciones = puntaje de la categoria para esa tuna
+
+  Por CATEGORIA en el total general:
+    - Puntaje categoria × peso de categoria (ej. 20% cada una)
+    - Suma de contribuciones = PUNTAJE TOTAL del participante
+
+  Ejemplo seed UNAC 2026:
+    - 5 categorias al 20% cada una
+    - 3 criterios por categoria al 40/30/30
+    - 4 jurados con asignaciones distintas por categoria
+
+  Datos precargados (schema.sql):
+    - 6 tunas participantes
+    - 4 jurados
+    - 5 categorias: Mejor Instrumental, Solista, Pandereta, Bandera, Capa
+
+
+9. BASE DE DATOS (SUPABASE)
+--------------------------------------------------------------------------------
+
+  Scripts SQL (ejecutar en orden):
+    1. supabase/schema.sql       — tablas + seed UNAC 2026
+    2. supabase/roles-rls.sql    — seguridad por rol (RLS)
+    3. supabase/link-by-email.sql — vinculacion por correo
+
+  Tablas principales:
+    profiles           — rol usuario (admin/jurado)
+    concursos          — datos del certamen activo
+    participantes      — tunas
+    jurados            — jurados + email + user_id
+    categorias         — categorias del concurso
+    categoria_criterios — criterios y pesos
+    jurado_categorias  — que jurado califica que categoria
+    calificaciones     — notas (jurado + participante + criterio)
+    admin_invites      — emails pendientes de rol admin
+
+  Seguridad (RLS):
+    - Jurado: solo lee/escribe calificaciones propias y criterios asignados
+    - Admin: acceso completo a configuracion y todas las calificaciones
+    - Lectura de participantes/categorias: todos los autenticados
+
+
+10. STACK TECNICO
+--------------------------------------------------------------------------------
+
+  Frontend:     Next.js 16, React 19, TypeScript, Tailwind CSS 4
+  Backend:      Server Actions, API Routes (auth callback)
+  Base datos:   Supabase PostgreSQL
+  Auth:         Supabase Auth (Google OAuth + email/password)
+  Hosting:      Vercel
+  Fuente:       Inter (estilo UNAC)
+  Colores:      Navy #07294d, Gold #ffc600, Blue #276caa
+
+
+11. ESTRUCTURA DEL PROYECTO
+--------------------------------------------------------------------------------
+
+  src/app/
+    page.tsx                 Dashboard admin
+    login/                   Login
+    auth/callback/           OAuth callback
+    jurado/                  Calificacion
+    resultados/              Rankings
+    admin/                   Configuracion + CRUD + accesos
+
+  src/components/
+    admin/                   Formularios CRUD
+    jurado/                  UI calificacion
+    layout/AppShell.tsx      Menu lateral
+    auth/GoogleLoginButton   Boton Google
+
+  src/lib/
+    certamen/service.ts      Lectura datos + guardar notas
+    certamen/admin-service.ts CRUD admin
+    certamen/aggregator.ts   Formulas de puntaje
+    certamen/mock-data.ts    Datos demo
+    auth/session.ts          Sesion y roles
+    auth/link-account.ts     Vinculacion por email
+    supabase/                Cliente Supabase SSR
+
+
+12. LIMITACIONES CONOCIDAS
+--------------------------------------------------------------------------------
+
+  FUNCIONALES
+  -----------
+  - Un solo concurso activo a la vez (primer concurso en BD / mock fijo)
+  - No hay UI para crear/editar el concurso (nombre, escala, estado) desde app
+  - No hay registro publico de usuarios; admin crea accesos o usa Google
+  - No envia emails de invitacion automaticos (solo pre-registro por correo)
+  - Resultados no son publicos; solo admin los ve
+  - No hay exportacion a Excel/PDF desde la app
+  - No hay historial de cambios en calificaciones (auditoria)
+  - Eliminar participante/jurado/categoria borra calificaciones sin recuperacion
+  - Un email solo puede estar en UN jurado (indice unico en jurados.email)
+  - Jurado inactivo no puede calificar pero sigue en BD
+
+  TECNICAS
+  --------
+  - Modo demo: datos en memoria, se pierden al reiniciar
+  - Requiere conexion a internet (Supabase + Vercel)
+  - Google OAuth en modo "Prueba" limita usuarios autorizados en Google Cloud
+  - Si link-by-email.sql no se ejecuto, vinculacion por correo no funciona
+  - Puerto local debe ser 3001; Supabase redirect debe coincidir
+  - La pagina /admin principal aun muestra texto desactualizado sobre "solo
+    consulta"; las subpaginas SI tienen CRUD completo
+
+  SEGURIDAD
+  ---------
+  - Claves Supabase publishable son publicas (normal en frontend)
+  - RLS protege datos; admin debe estar bien configurado en profiles
+  - Rotar Client Secret de Google si fue expuesto en capturas
+
+
+13. COMANDOS UTILES
+--------------------------------------------------------------------------------
+
+  Desarrollo:
+    npm install
+    npm run dev          # puerto 3001
+    npm run build
+    npm run start
+
+  Git:
+    git push origin main   # dispara redeploy en Vercel
+
+  Supabase — verificar email de usuario:
+    SELECT id, email FROM auth.users
+    WHERE lower(email) = 'correo@ejemplo.com';
+
+  Supabase — verificar admin:
+    SELECT * FROM admin_invites WHERE lower(email) = 'correo@ejemplo.com';
+    SELECT p.rol, u.email FROM profiles p
+    JOIN auth.users u ON u.id = p.id WHERE lower(u.email) = 'correo@ejemplo.com';
+
+  Supabase — verificar jurado:
+    SELECT nombre, email, user_id IS NOT NULL AS vinculado
+    FROM jurados WHERE lower(email) = 'correo@ejemplo.com';
+
+
+14. FLUJO RECOMENDADO PARA UN EVENTO
+--------------------------------------------------------------------------------
+
+  ANTES DEL CERTAMEN
+  1. Ejecutar schema.sql + roles-rls.sql + link-by-email.sql
+  2. Configurar variables en Vercel y redeploy
+  3. Configurar Google OAuth y URLs en Supabase
+  4. Crear/editar participantes, categorias, criterios y jurados en la app
+  5. Asignar email a cada jurado y admin en Accesos
+  6. Pedir a cada jurado que pruebe login antes del evento
+
+  DURANTE EL CERTAMEN
+  1. Jurados califican desde movil: tuna -> categoria -> notas -> Guardar
+  2. Admin monitorea resultados en /resultados
+  3. Admin puede corregir notas via Calificar > seleccionar jurado
+
+  DESPUES
+  1. Revisar rankings finales en /resultados
+  2. (Manual) exportar datos desde Supabase si se necesita Excel
+
+
+15. SOPORTE Y CONTACTO
+--------------------------------------------------------------------------------
+
+  Repositorio:  https://github.com/aruizlermo-sketch/App_Certamen_UNAC
+  Organizacion: Universidad Nacional del Callao (UNAC)
+  Web UNAC:     https://unac.edu.pe
+
+================================================================================
+  Fin del manual
+================================================================================

@@ -28,10 +28,10 @@ export const mockParticipantes: Participante[] = [
 ];
 
 export const mockJurados: Jurado[] = [
-  { id: "c0000001-0000-4000-8000-000000000001", concursoId: MOCK_CONCURSO_ID, nombre: "Municipalidad Carmen de la Legua", email: null, userId: null, activo: true },
-  { id: "c0000001-0000-4000-8000-000000000002", concursoId: MOCK_CONCURSO_ID, nombre: "Ministerio de Cultura", email: null, userId: null, activo: true },
-  { id: "c0000001-0000-4000-8000-000000000003", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna UNAC - Marco Perez", email: null, userId: null, activo: true },
-  { id: "c0000001-0000-4000-8000-000000000004", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna UNAC - Henry Lopez", email: null, userId: null, activo: true },
+  { id: "c0000001-0000-4000-8000-000000000001", concursoId: MOCK_CONCURSO_ID, nombre: "Municipalidad Carmen de la Legua", email: null, userId: null, esPresidente: false, activo: true },
+  { id: "c0000001-0000-4000-8000-000000000002", concursoId: MOCK_CONCURSO_ID, nombre: "Ministerio de Cultura", email: null, userId: null, esPresidente: false, activo: true },
+  { id: "c0000001-0000-4000-8000-000000000003", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna UNAC - Marco Perez", email: null, userId: null, esPresidente: false, activo: true },
+  { id: "c0000001-0000-4000-8000-000000000004", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna UNAC - Henry Lopez", email: null, userId: null, esPresidente: false, activo: true },
 ];
 
 export const mockCategorias: Categoria[] = [
