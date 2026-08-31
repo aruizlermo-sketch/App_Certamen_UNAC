@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { saveScoresAction } from "@/app/jurado/actions";
+import { calcularPuntajeDesdeBorrador } from "@/lib/certamen/aggregator";
 import type {
   Calificacion,
   CategoriaConCriterios,
@@ -98,6 +99,12 @@ export function ScoringForm({
     (crit) => draftScores[crit.id],
   ).length;
 
+  const puntajePonderado = calcularPuntajeDesdeBorrador(
+    categoria.criterios,
+    draftScores,
+  );
+  const puntajeCompleto = criteriosCompletados === categoria.criterios.length;
+
   const hasSelection = criteriosCompletados > 0;
 
   function handleSelectScore(criterioId: string, value: string) {
@@ -150,10 +157,22 @@ export function ScoringForm({
             {categoria.nombre}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="status-pill bg-blue-soft text-unac-blue">
             {criteriosCompletados}/{categoria.criterios.length} criterios
           </span>
+          {puntajePonderado !== null ? (
+            <span
+              className={`status-pill font-semibold ${
+                puntajeCompleto
+                  ? "bg-brand-soft text-brand ring-1 ring-brand/30"
+                  : "bg-page-bg text-text-muted"
+              }`}
+            >
+              Nota ponderada: {puntajePonderado.toFixed(3)}
+              {!puntajeCompleto ? "*" : ""}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -205,6 +224,23 @@ export function ScoringForm({
           );
         })}
       </div>
+
+      {puntajePonderado !== null ? (
+        <div className="rounded-lg border border-brand/30 bg-brand-soft/40 px-4 py-3">
+          <p className="text-sm text-text-muted">Tu nota ponderada total en esta categoria</p>
+          <p className="mt-1 text-2xl font-bold text-brand">
+            {puntajePonderado.toFixed(3)}
+            {!puntajeCompleto ? (
+              <span className="ml-2 text-sm font-normal text-text-muted">
+                (parcial — faltan criterios)
+              </span>
+            ) : null}
+          </p>
+          <p className="mt-1 text-xs text-text-muted">
+            Suma de cada nota multiplicada por su peso (ej. 8.5×40% + 7.5×30% + 8×30%)
+          </p>
+        </div>
+      ) : null}
 
       {feedback ? (
         <p

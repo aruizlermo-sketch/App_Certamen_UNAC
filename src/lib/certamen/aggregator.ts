@@ -21,6 +21,63 @@ function round2(n: number): number {
   return Math.round(n * 1000) / 1000;
 }
 
+/** Puntaje ponderado de un jurado para un participante en una categoria. */
+export function calcularPuntajeJurado(
+  participanteId: string,
+  categoriaId: string,
+  juradoId: string,
+  criterios: CategoriaCriterio[],
+  calificaciones: Calificacion[],
+): { puntaje: number; completo: boolean } | null {
+  const criteriosCat = criterios
+    .filter((c) => c.categoriaId === categoriaId)
+    .sort((a, b) => a.orden - b.orden);
+
+  if (criteriosCat.length === 0) return null;
+
+  let total = 0;
+  let scored = 0;
+
+  for (const crit of criteriosCat) {
+    const cal = calificaciones.find(
+      (c) =>
+        c.juradoId === juradoId &&
+        c.participanteId === participanteId &&
+        c.categoriaCriterioId === crit.id,
+    );
+    if (cal) {
+      total += cal.puntaje * crit.peso;
+      scored++;
+    }
+  }
+
+  if (scored === 0) return null;
+
+  return {
+    puntaje: round2(total),
+    completo: scored === criteriosCat.length,
+  };
+}
+
+/** Puntaje ponderado a partir de borrador del formulario de calificacion. */
+export function calcularPuntajeDesdeBorrador(
+  criterios: CategoriaCriterio[],
+  draftScores: Record<string, string>,
+): number | null {
+  let total = 0;
+  let scored = 0;
+
+  for (const crit of criterios) {
+    const raw = draftScores[crit.id];
+    if (!raw) continue;
+    total += Number(raw) * crit.peso;
+    scored++;
+  }
+
+  if (scored === 0) return null;
+  return round2(total);
+}
+
 export function calcularPuntajeCategoria(
   participanteId: string,
   participanteNombre: string,
