@@ -3,6 +3,8 @@ import { requireNotasJuradosAccess } from "@/lib/auth/session";
 import { getCalificaciones, getConcursoCompleto } from "@/lib/certamen/service";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function NotasJuradosPage() {
   const session = await requireNotasJuradosAccess();
   const concurso = await getConcursoCompleto();

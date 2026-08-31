@@ -55,6 +55,10 @@ export const getConcursoCompleto = cache(async (
     );
   }
 
+  const session = await getAppSession();
+  const useSupervisionRpc =
+    session.esPresidente && session.rol !== "admin";
+
   const supabase = await createServerClient();
 
   const { data: concursoRow } = await supabase
@@ -76,8 +80,8 @@ export const getConcursoCompleto = cache(async (
   const [
     { data: criterios },
     { data: participantes },
-    { data: jurados },
-    { data: juradoCats },
+    juradosResult,
+    juradoCatsResult,
   ] = await Promise.all([
     categoriaIds.length
       ? supabase
@@ -86,22 +90,29 @@ export const getConcursoCompleto = cache(async (
           .in("categoria_id", categoriaIds)
       : Promise.resolve({ data: [] as Record<string, unknown>[] }),
     supabase.from("participantes").select("*").eq("concurso_id", id).order("orden"),
-    supabase.from("jurados").select("*").eq("concurso_id", id),
-    categoriaIds.length
-      ? supabase
-          .from("jurado_categorias")
-          .select("*")
-          .in("categoria_id", categoriaIds)
-      : Promise.resolve({ data: [] as Record<string, unknown>[] }),
+    useSupervisionRpc
+      ? supabase.rpc("supervision_jurados", { p_concurso_id: id })
+      : supabase.from("jurados").select("*").eq("concurso_id", id),
+    useSupervisionRpc
+      ? supabase.rpc("supervision_jurado_categorias", { p_concurso_id: id })
+      : categoriaIds.length
+        ? supabase
+            .from("jurado_categorias")
+            .select("*")
+            .in("categoria_id", categoriaIds)
+        : Promise.resolve({ data: [] as Record<string, unknown>[] }),
   ]);
+
+  const jurados = juradosResult.data ?? [];
+  const juradoCats = juradoCatsResult.data ?? [];
 
   return buildConcursoCompleto(
     mapConcurso(concursoRow),
     (categorias ?? []).map(mapCategoria),
     (criterios ?? []).map(mapCriterio),
     (participantes ?? []).map(mapParticipante),
-    (jurados ?? []).map(mapJurado),
-    (juradoCats ?? []).map(mapJuradoCategoria),
+    jurados.map(mapJurado),
+    juradoCats.map(mapJuradoCategoria),
   );
 });
 

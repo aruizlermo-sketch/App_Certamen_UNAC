@@ -125,6 +125,40 @@ $$;
 grant execute on function public.link_user_by_email(uuid, text) to authenticated;
 
 -- ============================================================
+-- Supervision presidente: lectura completa sin depender de RLS
+-- ============================================================
+
+create or replace function public.supervision_jurados(p_concurso_id uuid)
+returns setof jurados
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select j.*
+  from jurados j
+  where j.concurso_id = p_concurso_id
+    and (is_admin() or is_presidente_jurado());
+$$;
+
+create or replace function public.supervision_jurado_categorias(p_concurso_id uuid)
+returns table(jurado_id uuid, categoria_id uuid)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select jc.jurado_id, jc.categoria_id
+  from jurado_categorias jc
+  join categorias c on c.id = jc.categoria_id
+  where c.concurso_id = p_concurso_id
+    and (is_admin() or is_presidente_jurado());
+$$;
+
+grant execute on function public.supervision_jurados(uuid) to authenticated;
+grant execute on function public.supervision_jurado_categorias(uuid) to authenticated;
+
+-- ============================================================
 -- Limpiar politicas permisivas (instalaciones antiguas)
 -- ============================================================
 

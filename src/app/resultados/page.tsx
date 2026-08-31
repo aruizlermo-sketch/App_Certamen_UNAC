@@ -8,6 +8,8 @@ import {
 } from "@/lib/auth/session";
 import { getResultados } from "@/lib/certamen/service";
 
+export const dynamic = "force-dynamic";
+
 export default async function ResultadosPage() {
   const session = await requireResultadosAccess();
   const resultados = await getResultados();
