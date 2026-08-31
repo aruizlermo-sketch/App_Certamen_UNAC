@@ -50,7 +50,7 @@ const adminNavGroups: NavGroup[] = [
       { href: "/admin", label: "Configuracion", icon: <IconClipboard className="h-4 w-4" /> },
       { href: "/jurado", label: "Calificar", icon: <IconStar className="h-4 w-4" /> },
       { href: "/resultados", label: "Resultados", icon: <IconTrophy className="h-4 w-4" /> },
-      { href: "/resultados/notas", label: "Notas jurados", icon: <IconChart className="h-4 w-4" /> },
+      { href: "/resultados/notas", label: "Notas de jurado", icon: <IconChart className="h-4 w-4" /> },
     ],
   },
   {
@@ -80,7 +80,7 @@ const juradoResultadosItem: NavItem = {
 };
 
 const presidenteExtraItems: NavItem[] = [
-  { href: "/resultados/notas", label: "Notas jurados", icon: <IconChart className="h-4 w-4" /> },
+  { href: "/resultados/notas", label: "Notas de jurado", icon: <IconChart className="h-4 w-4" /> },
 ];
 
 function buildJuradoNav(esPresidente: boolean): NavGroup[] {
@@ -153,7 +153,7 @@ function pageTitle(pathname: string) {
   if (pathname.startsWith("/admin/categorias")) return "Categorias";
   if (pathname.startsWith("/admin")) return "Configuracion";
   if (pathname.startsWith("/jurado")) return "Calificacion";
-  if (pathname.startsWith("/resultados/notas")) return "Notas jurados";
+  if (pathname.startsWith("/resultados/notas")) return "Notas de jurado";
   if (pathname.startsWith("/resultados")) return "Resultados";
   return "Certamen UNAC";
 }

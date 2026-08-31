@@ -3,6 +3,7 @@ import { DownloadResultadosPdfButton } from "@/components/resultados/DownloadRes
 import { ResultadosView } from "@/components/resultados/ResultadosView";
 import {
   canPrintResultados,
+  canViewNotasJurados,
   requireResultadosAccess,
 } from "@/lib/auth/session";
 import { getResultados } from "@/lib/certamen/service";
@@ -12,6 +13,7 @@ export default async function ResultadosPage() {
   const resultados = await getResultados();
   const isJurado = session.rol === "jurado";
   const canDownloadPdf = canPrintResultados(session);
+  const canViewNotas = canViewNotasJurados(session);
 
   if (!resultados) {
     return (
@@ -29,9 +31,15 @@ export default async function ResultadosPage() {
       {isJurado ? (
         <div className="info-banner">
           <strong>Vista de jurado:</strong> rankings del certamen en solo lectura.
-          {session.esPresidente
-            ? " Como presidente puedes descargar el acta en PDF."
-            : " Tus notas se editan solo desde Calificar."}
+          {session.esPresidente ? (
+            <>
+              {" "}
+              Como presidente puedes ver las notas de todos los jurados, los
+              resultados globales y descargar el acta en PDF.
+            </>
+          ) : (
+            " Tus notas se editan solo desde Calificar."
+          )}
         </div>
       ) : null}
 
@@ -44,9 +52,9 @@ export default async function ResultadosPage() {
           <Link href={backHref} className="btn-secondary">
             {backLabel}
           </Link>
-          {session.rol === "admin" ? (
+          {canViewNotas ? (
             <Link href="/resultados/notas" className="btn-secondary">
-              Notas por jurado
+              Notas de jurado
             </Link>
           ) : null}
           {canDownloadPdf ? (

@@ -195,7 +195,7 @@ create policy "participantes_admin_write" on participantes
 drop policy if exists "jurados_select" on jurados;
 create policy "jurados_select" on jurados
   for select to authenticated
-  using (user_id = auth.uid() or is_admin());
+  using (user_id = auth.uid() or is_admin() or is_presidente_jurado());
 
 drop policy if exists "jurados_admin_write" on jurados;
 create policy "jurados_admin_write" on jurados
@@ -208,6 +208,7 @@ create policy "jurado_categorias_select" on jurado_categorias
   for select to authenticated
   using (
     is_admin()
+    or is_presidente_jurado()
     or jurado_id in (select my_jurado_ids())
   );
 
