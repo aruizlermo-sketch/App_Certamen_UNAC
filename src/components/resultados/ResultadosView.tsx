@@ -107,7 +107,7 @@ export function ResultadosView({ resultados, readOnly = false }: ResultadosViewP
               ) : null}
             </div>
             <span className="status-pill bg-brand-soft text-text">
-              Peso total: {(rc.categoria.pesoTotal * 100).toFixed(0)}%
+              Suma de jurados
             </span>
           </div>
 

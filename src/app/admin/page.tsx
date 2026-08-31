@@ -56,11 +56,11 @@ export default async function AdminPage() {
             Escala de calificacion: {concurso.escalaMin} a {concurso.escalaMax}
           </li>
           <li>
-            Por categoria: promedio de jurados por criterio, ponderado
+            Por categoria: suma de notas de jurados por criterio, ponderado
             (40% / 30% / 30%)
           </li>
           <li>
-            Puntaje total: suma de puntajes por categoria × peso (20% c/u)
+            Puntaje total: suma de puntajes por categoria
           </li>
         </ul>
       </div>

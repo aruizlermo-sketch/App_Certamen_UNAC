@@ -12,9 +12,8 @@ import type {
   ResultadosConcurso,
 } from "@/types/certamen";
 
-function avg(values: number[]): number {
-  if (values.length === 0) return 0;
-  return values.reduce((a, b) => a + b, 0) / values.length;
+function sum(values: number[]): number {
+  return values.reduce((a, b) => a + b, 0);
 }
 
 function round2(n: number): number {
@@ -100,13 +99,13 @@ export function calcularPuntajeCategoria(
       )
       .map((cal) => cal.puntaje);
 
-    const promedio = avg(notas);
-    const contribucion = promedio * crit.peso;
+    const sumaJurados = sum(notas);
+    const contribucion = sumaJurados * crit.peso;
 
     return {
       criterioId: crit.id,
       criterioNombre: crit.nombre,
-      promedio: round2(promedio),
+      promedio: round2(sumaJurados),
       peso: crit.peso,
       contribucion: round2(contribucion),
     };
@@ -175,12 +174,12 @@ export function calcularPuntajeTotal(
       categoriaNombre: cat.nombre,
       puntaje,
       peso: cat.pesoTotal,
-      contribucion: round2(puntaje * cat.pesoTotal),
+      contribucion: round2(puntaje),
     };
   });
 
   const puntajeTotal = round2(
-    porCategoria.reduce((sum, c) => sum + c.contribucion, 0),
+    porCategoria.reduce((sum, c) => sum + c.puntaje, 0),
   );
 
   return {
