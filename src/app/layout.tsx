@@ -18,8 +18,6 @@ export const metadata: Metadata = {
   description: "Sistema de calificacion para concurso de tunas universitarias — UNAC",
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function RootLayout({
   children,
 }: Readonly<{

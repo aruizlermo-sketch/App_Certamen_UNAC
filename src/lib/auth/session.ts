@@ -1,5 +1,5 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
-import { linkUserByEmail } from "@/lib/auth/link-account";
 import { canViewResultados, canViewNotasJurados } from "@/lib/auth/guards";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
@@ -18,7 +18,7 @@ const demoSession: AppSession = {
   isDemo: true,
 };
 
-export async function getAppSession(): Promise<AppSession> {
+export const getAppSession = cache(async (): Promise<AppSession> => {
   if (!isSupabaseConfigured()) {
     return demoSession;
   }
@@ -39,8 +39,6 @@ export async function getAppSession(): Promise<AppSession> {
       isDemo: false,
     };
   }
-
-  await linkUserByEmail(user.id, user.email);
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -78,7 +76,7 @@ export async function getAppSession(): Promise<AppSession> {
     esPresidente: jurado ? Boolean(jurado.es_presidente) : false,
     isDemo: false,
   };
-}
+});
 
 export async function requireAuth(): Promise<AppSession> {
   const session = await getAppSession();

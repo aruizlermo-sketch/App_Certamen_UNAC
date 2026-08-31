@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { downloadResultadosPdf } from "@/lib/certamen/resultados-pdf";
 import type { ResultadosConcurso } from "@/types/certamen";
 
 type DownloadResultadosPdfButtonProps = {
@@ -15,9 +14,10 @@ export function DownloadResultadosPdfButton({
 }: DownloadResultadosPdfButtonProps) {
   const [loading, setLoading] = useState(false);
 
-  function handleDownload() {
+  async function handleDownload() {
     setLoading(true);
     try {
+      const { downloadResultadosPdf } = await import("@/lib/certamen/resultados-pdf");
       downloadResultadosPdf(resultados);
     } finally {
       setLoading(false);

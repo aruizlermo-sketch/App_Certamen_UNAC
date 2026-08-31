@@ -41,6 +41,17 @@ WHERE lower(trim(email)) = 'correo@ejemplo.com';
 
 Luego el jurado vuelve a iniciar sesion.
 
+## Resetear calificaciones
+
+Script: **`reset-calificaciones.sql`**
+
+1. Abre **Supabase → SQL Editor**
+2. Ejecuta primero las consultas `SELECT` de verificacion (descomentadas en el archivo)
+3. Descomenta **una** opcion `DELETE` (A = Certamen UNAC 2026, B = concurso activo, D = todo)
+4. Ejecuta y confirma que el conteo quede en **0**
+
+No borra participantes, jurados ni categorias.
+
 ## Seguridad
 
 - **No ejecutar solo `schema.sql` en produccion** sin `policies.sql`: las tablas quedan sin politicas utiles.

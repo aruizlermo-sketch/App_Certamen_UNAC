@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerClient } from "@/lib/supabase/server";
 import { getAppSession } from "@/lib/auth/session";
@@ -38,9 +39,9 @@ import type {
   ResultadosConcurso,
 } from "@/types/certamen";
 
-export async function getConcursoCompleto(
+export const getConcursoCompleto = cache(async (
   concursoId?: string,
-): Promise<ConcursoCompleto | null> {
+): Promise<ConcursoCompleto | null> => {
   const id = concursoId ?? mockConcurso.id;
 
   if (!isSupabaseConfigured()) {
@@ -64,37 +65,45 @@ export async function getConcursoCompleto(
 
   if (!concursoRow) return null;
 
+  const { data: categorias } = await supabase
+    .from("categorias")
+    .select("*")
+    .eq("concurso_id", id)
+    .order("orden");
+
+  const categoriaIds = (categorias ?? []).map((c) => String(c.id));
+
   const [
-    { data: categorias },
     { data: criterios },
     { data: participantes },
     { data: jurados },
     { data: juradoCats },
   ] = await Promise.all([
-    supabase.from("categorias").select("*").eq("concurso_id", id).order("orden"),
-    supabase.from("categoria_criterios").select("*"),
+    categoriaIds.length
+      ? supabase
+          .from("categoria_criterios")
+          .select("*")
+          .in("categoria_id", categoriaIds)
+      : Promise.resolve({ data: [] as Record<string, unknown>[] }),
     supabase.from("participantes").select("*").eq("concurso_id", id).order("orden"),
     supabase.from("jurados").select("*").eq("concurso_id", id),
-    supabase.from("jurado_categorias").select("*"),
+    categoriaIds.length
+      ? supabase
+          .from("jurado_categorias")
+          .select("*")
+          .in("categoria_id", categoriaIds)
+      : Promise.resolve({ data: [] as Record<string, unknown>[] }),
   ]);
-
-  const categoriaIds = (categorias ?? []).map((c) => String(c.id));
-  const criteriosFiltered = (criterios ?? []).filter((c) =>
-    categoriaIds.includes(String(c.categoria_id)),
-  );
-  const juradoCatsFiltered = (juradoCats ?? []).filter((jc) =>
-    categoriaIds.includes(String(jc.categoria_id)),
-  );
 
   return buildConcursoCompleto(
     mapConcurso(concursoRow),
     (categorias ?? []).map(mapCategoria),
-    criteriosFiltered.map(mapCriterio),
+    (criterios ?? []).map(mapCriterio),
     (participantes ?? []).map(mapParticipante),
     (jurados ?? []).map(mapJurado),
-    juradoCatsFiltered.map(mapJuradoCategoria),
+    (juradoCats ?? []).map(mapJuradoCategoria),
   );
-}
+});
 
 export async function getCalificaciones(
   concursoId?: string,
@@ -237,6 +246,87 @@ export async function saveCalificacion(input: {
       categoria_criterio_id: input.categoriaCriterioId,
       puntaje: input.puntaje,
     },
+    { onConflict: "jurado_id,participante_id,categoria_criterio_id" },
+  );
+
+  if (error) {
+    return fail(error.message);
+  }
+
+  return ok();
+}
+
+export async function saveCalificaciones(input: {
+  juradoId: string;
+  participanteId: string;
+  scores: Array<{ categoriaCriterioId: string; puntaje: number }>;
+  escalaMin: number;
+  escalaMax: number;
+}): Promise<VoidResult> {
+  if (!input.scores.length) {
+    return fail("No hay notas para guardar.");
+  }
+
+  const session = await getAppSession();
+
+  const juradoId = resolveJuradoIdForSave(session, input.juradoId);
+  if (!juradoId) {
+    return fail("No tienes permiso para calificar.");
+  }
+
+  for (const score of input.scores) {
+    const puntajeError = validatePuntaje(
+      score.puntaje,
+      input.escalaMin,
+      input.escalaMax,
+    );
+    if (puntajeError) return puntajeError;
+  }
+
+  const concurso = await getConcursoCompleto();
+  if (!concurso) {
+    return fail("Concurso no encontrado.");
+  }
+
+  for (const score of input.scores) {
+    const categoryCheck = assertJuradoOwnsCategory(
+      concurso,
+      juradoId,
+      score.categoriaCriterioId,
+    );
+    if (!categoryCheck.ok) {
+      return categoryCheck;
+    }
+  }
+
+  if (!isSupabaseConfigured()) {
+    for (const score of input.scores) {
+      upsertMockCalificacion({
+        juradoId,
+        participanteId: input.participanteId,
+        categoriaCriterioId: score.categoriaCriterioId,
+        puntaje: score.puntaje,
+      });
+    }
+    return ok();
+  }
+
+  if (session.rol === "jurado" && session.juradoId !== juradoId) {
+    return fail("No puedes calificar como otro jurado.");
+  }
+
+  if (session.esPresidente && session.juradoId !== juradoId) {
+    return fail("Como presidente solo puedes editar tus propias notas.");
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase.from("calificaciones").upsert(
+    input.scores.map((score) => ({
+      jurado_id: juradoId,
+      participante_id: input.participanteId,
+      categoria_criterio_id: score.categoriaCriterioId,
+      puntaje: score.puntaje,
+    })),
     { onConflict: "jurado_id,participante_id,categoria_criterio_id" },
   );
 

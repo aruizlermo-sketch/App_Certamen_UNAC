@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { linkUserByEmail } from "@/lib/auth/link-account";
 import { getAppSession } from "@/lib/auth/session";
 import { safeNextPath } from "@/lib/auth/messages";
 import { createServerClient } from "@/lib/supabase/server";
@@ -21,6 +22,14 @@ export async function GET(request: Request) {
 
   if (error) {
     return accessDeniedRedirect(origin);
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    await linkUserByEmail(user.id, user.email);
   }
 
   const session = await getAppSession();

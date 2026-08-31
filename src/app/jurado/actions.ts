@@ -1,7 +1,7 @@
 "use server";
 
 import { getAppSession } from "@/lib/auth/session";
-import { getCalificaciones, saveCalificacion } from "@/lib/certamen/service";
+import { getCalificaciones, saveCalificacion, saveCalificaciones } from "@/lib/certamen/service";
 import { revalidateCertamenPaths } from "@/lib/revalidate-paths";
 
 export async function loadCalificacionesAction(juradoId: string) {
@@ -57,25 +57,17 @@ export async function saveScoresAction(input: SaveScoresInput) {
       ? session.juradoId
       : input.juradoId;
 
-  if (!input.scores.length) {
-    return { ok: false as const, error: "No hay notas para guardar." };
+  const result = await saveCalificaciones({
+    juradoId,
+    participanteId: input.participanteId,
+    scores: input.scores,
+    escalaMin: input.escalaMin,
+    escalaMax: input.escalaMax,
+  });
+
+  if (result.ok) {
+    revalidateCertamenPaths();
   }
 
-  for (const score of input.scores) {
-    const result = await saveCalificacion({
-      juradoId,
-      participanteId: input.participanteId,
-      categoriaCriterioId: score.categoriaCriterioId,
-      puntaje: score.puntaje,
-      escalaMin: input.escalaMin,
-      escalaMax: input.escalaMax,
-    });
-
-    if (!result.ok) {
-      return result;
-    }
-  }
-
-  revalidateCertamenPaths();
-  return { ok: true as const };
+  return result;
 }
