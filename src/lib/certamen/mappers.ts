@@ -27,6 +27,7 @@ export function mapCategoria(row: DbRow): Categoria {
     nombre: String(row.nombre),
     descripcion: row.descripcion ? String(row.descripcion) : null,
     multiplicador: Number(row.peso_total),
+    tienePremio: row.tiene_premio == null ? true : Boolean(row.tiene_premio),
     orden: Number(row.orden),
   };
 }

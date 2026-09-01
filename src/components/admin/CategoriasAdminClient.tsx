@@ -21,6 +21,7 @@ type CategoriaForm = {
   nombre: string;
   descripcion: string;
   multiplicador: string;
+  tienePremio: boolean;
   orden: string;
 };
 
@@ -35,6 +36,7 @@ const emptyCategoria: CategoriaForm = {
   nombre: "",
   descripcion: "",
   multiplicador: "1",
+  tienePremio: true,
   orden: "",
 };
 
@@ -70,6 +72,7 @@ export function CategoriasAdminClient({
       nombre: cat.nombre,
       descripcion: cat.descripcion ?? "",
       multiplicador: String(cat.multiplicador),
+      tienePremio: cat.tienePremio,
       orden: String(cat.orden),
     });
     setError(null);
@@ -109,6 +112,7 @@ export function CategoriasAdminClient({
     fd.set("nombre", catForm.nombre);
     fd.set("descripcion", catForm.descripcion);
     fd.set("multiplicador", catForm.multiplicador);
+    fd.set("tienePremio", catForm.tienePremio ? "true" : "false");
     fd.set("orden", catForm.orden || "0");
 
     startTransition(async () => {
@@ -224,6 +228,26 @@ export function CategoriasAdminClient({
               className="input-field mt-1.5"
             />
           </div>
+          <div className="sm:col-span-2">
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-page-bg px-4 py-3">
+              <input
+                type="checkbox"
+                checked={catForm.tienePremio}
+                onChange={(e) =>
+                  setCatForm((f) => ({ ...f, tienePremio: e.target.checked }))
+                }
+                className="h-4 w-4 rounded border-border text-brand focus:ring-brand"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-text">
+                  Esta categoria tiene premio
+                </span>
+                <span className="block text-xs text-text-muted">
+                  Aparece como premiada en resultados y actas.
+                </span>
+              </span>
+            </label>
+          </div>
         </div>
         {error && !activeCategoriaId ? (
           <p className="rounded-xl bg-coral-soft px-3 py-2 text-sm text-coral">{error}</p>
@@ -251,6 +275,15 @@ export function CategoriasAdminClient({
               <div className="flex flex-wrap items-center gap-2">
                 <span className="status-pill bg-brand-soft text-text">
                   Mult. ×{cat.multiplicador}
+                </span>
+                <span
+                  className={`status-pill ${
+                    cat.tienePremio
+                      ? "bg-green-soft text-green"
+                      : "bg-page-bg text-text-muted"
+                  }`}
+                >
+                  {cat.tienePremio ? "Con premio" : "Sin premio"}
                 </span>
                 <button
                   type="button"

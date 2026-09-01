@@ -317,6 +317,7 @@ export async function createCategoria(input: {
   nombre: string;
   descripcion: string | null;
   multiplicador: number;
+  tienePremio: boolean;
   orden: number;
 }): Promise<VoidResult> {
   const denied = await assertAdminSession();
@@ -331,6 +332,7 @@ export async function createCategoria(input: {
       nombre: input.nombre,
       descripcion: input.descripcion,
       multiplicador: input.multiplicador,
+      tienePremio: input.tienePremio,
       orden: input.orden,
     });
     return ok();
@@ -342,6 +344,7 @@ export async function createCategoria(input: {
     nombre: input.nombre,
     descripcion: input.descripcion,
     peso_total: input.multiplicador,
+    tiene_premio: input.tienePremio,
     orden: input.orden,
   });
 
@@ -354,6 +357,7 @@ export async function updateCategoria(
     nombre: string;
     descripcion: string | null;
     multiplicador: number;
+    tienePremio: boolean;
     orden: number;
   },
 ): Promise<VoidResult> {
@@ -368,6 +372,7 @@ export async function updateCategoria(
     item.nombre = input.nombre;
     item.descripcion = input.descripcion;
     item.multiplicador = input.multiplicador;
+    item.tienePremio = input.tienePremio;
     item.orden = input.orden;
     return ok();
   }
@@ -379,6 +384,7 @@ export async function updateCategoria(
       nombre: input.nombre,
       descripcion: input.descripcion,
       peso_total: input.multiplicador,
+      tiene_premio: input.tienePremio,
       orden: input.orden,
     })
     .eq("id", id);

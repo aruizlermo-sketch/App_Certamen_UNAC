@@ -42,6 +42,7 @@ create table if not exists categorias (
   nombre text not null,
   descripcion text,
   peso_total numeric(6, 3) not null default 1 check (peso_total >= 0),
+  tiene_premio boolean not null default true,
   orden int not null default 0,
   created_at timestamptz not null default now()
 );

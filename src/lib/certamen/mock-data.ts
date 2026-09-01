@@ -35,11 +35,11 @@ export const mockJurados: Jurado[] = [
 ];
 
 export const mockCategorias: Categoria[] = [
-  { id: "d0000001-0000-4000-8000-000000000001", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Instrumental", descripcion: "Evalúa la ejecución musical centrada en calidad y coordinación de instrumentos.", multiplicador: 1, orden: 1 },
-  { id: "d0000001-0000-4000-8000-000000000002", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Solista", descripcion: "Evalúa la actuación del solista vocal.", multiplicador: 1, orden: 2 },
-  { id: "d0000001-0000-4000-8000-000000000003", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Pandereta", descripcion: "Evalúa el manejo de la pandereta.", multiplicador: 1, orden: 3 },
-  { id: "d0000001-0000-4000-8000-000000000004", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Bandera", descripcion: "Evalúa el manejo de la bandera.", multiplicador: 1, orden: 4 },
-  { id: "d0000001-0000-4000-8000-000000000005", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Capa", descripcion: "Evalúa la ejecución con capa.", multiplicador: 1, orden: 5 },
+  { id: "d0000001-0000-4000-8000-000000000001", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Instrumental", descripcion: "Evalúa la ejecución musical centrada en calidad y coordinación de instrumentos.", multiplicador: 1, tienePremio: true, orden: 1 },
+  { id: "d0000001-0000-4000-8000-000000000002", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Solista", descripcion: "Evalúa la actuación del solista vocal.", multiplicador: 1, tienePremio: true, orden: 2 },
+  { id: "d0000001-0000-4000-8000-000000000003", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Pandereta", descripcion: "Evalúa el manejo de la pandereta.", multiplicador: 1, tienePremio: true, orden: 3 },
+  { id: "d0000001-0000-4000-8000-000000000004", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Bandera", descripcion: "Evalúa el manejo de la bandera.", multiplicador: 1, tienePremio: true, orden: 4 },
+  { id: "d0000001-0000-4000-8000-000000000005", concursoId: MOCK_CONCURSO_ID, nombre: "Mejor Capa", descripcion: "Evalúa la ejecución con capa.", multiplicador: 1, tienePremio: true, orden: 5 },
 ];
 
 export const mockCriterios: CategoriaCriterio[] = [

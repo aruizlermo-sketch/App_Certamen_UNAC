@@ -16,6 +16,7 @@ export type Categoria = {
   nombre: string;
   descripcion: string | null;
   multiplicador: number;
+  tienePremio: boolean;
   orden: number;
 };
 

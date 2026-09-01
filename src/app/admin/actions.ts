@@ -99,6 +99,7 @@ export async function createCategoriaAction(formData: FormData): Promise<VoidRes
       nombre: String(formData.get("nombre") ?? "").trim(),
       descripcion: String(formData.get("descripcion") ?? "").trim() || null,
       multiplicador: Number(formData.get("multiplicador") ?? 1),
+      tienePremio: formData.get("tienePremio") === "true",
       orden: Number(formData.get("orden") ?? 0),
     }),
   );
@@ -110,6 +111,7 @@ export async function updateCategoriaAction(formData: FormData): Promise<VoidRes
       nombre: String(formData.get("nombre") ?? "").trim(),
       descripcion: String(formData.get("descripcion") ?? "").trim() || null,
       multiplicador: Number(formData.get("multiplicador") ?? 1),
+      tienePremio: formData.get("tienePremio") === "true",
       orden: Number(formData.get("orden") ?? 0),
     }),
   );

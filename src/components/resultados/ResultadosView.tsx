@@ -106,9 +106,20 @@ export function ResultadosView({ resultados, readOnly = false }: ResultadosViewP
                 </p>
               ) : null}
             </div>
+            <div className="flex flex-wrap items-center gap-2">
             <span className="status-pill bg-brand-soft text-text">
               Mult. ×{rc.categoria.multiplicador}
             </span>
+            <span
+              className={`status-pill ${
+                rc.categoria.tienePremio
+                  ? "bg-green-soft text-green"
+                  : "bg-page-bg text-text-muted"
+              }`}
+            >
+              {rc.categoria.tienePremio ? "Con premio" : "Sin premio"}
+            </span>
+            </div>
           </div>
 
           <div className="mt-4 overflow-x-auto">
