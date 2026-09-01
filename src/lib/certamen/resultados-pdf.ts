@@ -44,7 +44,7 @@ export function downloadResultadosPdf(resultados: ResultadosConcurso) {
   doc.text("Primera mejor tuna", 14, 38);
   doc.setFont("helvetica", "normal");
   doc.text(
-    primera
+    primera && primera.puntajeTotal > 0
       ? `${primera.participanteNombre} — ${formatPuntaje(primera.puntajeTotal)}`
       : "Por definir",
     14,
@@ -55,7 +55,7 @@ export function downloadResultadosPdf(resultados: ResultadosConcurso) {
   doc.text("Segunda mejor tuna", 120, 38);
   doc.setFont("helvetica", "normal");
   doc.text(
-    segunda
+    segunda && segunda.puntajeTotal > 0
       ? `${segunda.participanteNombre} — ${formatPuntaje(segunda.puntajeTotal)}`
       : "Por definir",
     120,

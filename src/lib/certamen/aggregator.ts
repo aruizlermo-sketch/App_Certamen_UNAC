@@ -144,10 +144,12 @@ export function calcularRankingCategoria(
     )
     .sort((a, b) => b.puntaje - a.puntaje);
 
+  const lider = ranking[0] ?? null;
+
   return {
     categoria,
     ranking,
-    ganador: ranking[0] ?? null,
+    ganador: lider && lider.puntaje > 0 ? lider : null,
   };
 }
 

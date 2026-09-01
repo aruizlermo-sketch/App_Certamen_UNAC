@@ -1,6 +1,8 @@
 import { IconStar, IconTrophy } from "@/components/icons/AppIcons";
 import { EscudoParticipanteBox } from "@/components/participantes/EscudoParticipante";
-import type { ResultadosConcurso } from "@/types/certamen";type ResultadosViewProps = {
+import type { ResultadosConcurso } from "@/types/certamen";
+
+type ResultadosViewProps = {
   resultados: ResultadosConcurso;
   readOnly?: boolean;
 };
@@ -128,7 +130,7 @@ function PremioCategoriaCard({
             Premio individual
           </p>
           <h3 className="mt-1 text-lg font-bold text-text">{categoriaNombre}</h3>
-          {ganadorNombre ? (
+          {ganadorNombre && (puntaje ?? 0) > 0 ? (
             <>
               <div className="mt-3 flex items-center gap-3">
                 <EscudoParticipanteBox
@@ -223,9 +225,19 @@ export function ResultadosView({ resultados, readOnly = false }: ResultadosViewP
               <PremioCategoriaCard
                 key={rc.categoria.id}
                 categoriaNombre={rc.categoria.nombre}
-                ganadorNombre={rc.ganador?.participanteNombre ?? null}
-                ganadorEscudoUrl={rc.ganador?.participanteEscudoUrl ?? null}
-                puntaje={rc.ganador?.puntaje ?? null}
+                ganadorNombre={
+                  rc.ganador && rc.ganador.puntaje > 0
+                    ? rc.ganador.participanteNombre
+                    : null
+                }
+                ganadorEscudoUrl={
+                  rc.ganador && rc.ganador.puntaje > 0
+                    ? rc.ganador.participanteEscudoUrl
+                    : null
+                }
+                puntaje={
+                  rc.ganador && rc.ganador.puntaje > 0 ? rc.ganador.puntaje : null
+                }
               />
             ))}
           </div>
