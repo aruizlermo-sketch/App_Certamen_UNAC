@@ -35,6 +35,35 @@ export function EscudoParticipante({
   );
 }
 
+type EscudoParticipanteBoxProps = {
+  url: string | null | undefined;
+  nombre: string;
+  boxClassName?: string;
+  imageClassName?: string;
+};
+
+/** Escudo en caja fija: usa todo el espacio disponible sin agrandar el contenedor padre. */
+export function EscudoParticipanteBox({
+  url,
+  nombre,
+  boxClassName = "h-16 w-16",
+  imageClassName = "object-contain",
+}: EscudoParticipanteBoxProps) {
+  if (!url) return null;
+
+  return (
+    <span className={`relative inline-block shrink-0 ${boxClassName}`}>
+      <Image
+        src={url}
+        alt={`Escudo ${nombre}`}
+        fill
+        sizes="128px"
+        className={imageClassName}
+      />
+    </span>
+  );
+}
+
 type ParticipanteConEscudoProps = {
   nombre: string;
   escudoUrl?: string | null;

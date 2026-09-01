@@ -1,7 +1,6 @@
 import { IconStar, IconTrophy } from "@/components/icons/AppIcons";
-import { ParticipanteConEscudo } from "@/components/participantes/EscudoParticipante";
-import type { ResultadosConcurso } from "@/types/certamen";
-type ResultadosViewProps = {
+import { EscudoParticipanteBox } from "@/components/participantes/EscudoParticipante";
+import type { ResultadosConcurso } from "@/types/certamen";type ResultadosViewProps = {
   resultados: ResultadosConcurso;
   readOnly?: boolean;
 };
@@ -81,13 +80,16 @@ function GanadorTotalCard({
           <p className="text-lg font-medium text-white/60">Por definir</p>
         ) : (
           <>
-            <ParticipanteConEscudo
-              nombre={nombre}
-              escudoUrl={escudoUrl}
-              size="lg"
-              className="items-center"
-              nombreClassName="text-xl font-bold leading-snug sm:text-2xl"
-            />
+            <div className="flex items-center gap-4">
+              <EscudoParticipanteBox
+                url={escudoUrl}
+                nombre={nombre}
+                boxClassName="h-24 w-24 sm:h-28 sm:w-28"
+              />
+              <p className="min-w-0 flex-1 text-xl font-bold leading-snug sm:text-2xl">
+                {nombre}
+              </p>
+            </div>
             <div className="mt-4 flex flex-wrap items-end gap-3">
               <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${badge}`}>
                 Ganadora
@@ -128,12 +130,16 @@ function PremioCategoriaCard({
           <h3 className="mt-1 text-lg font-bold text-text">{categoriaNombre}</h3>
           {ganadorNombre ? (
             <>
-              <ParticipanteConEscudo
-                nombre={ganadorNombre}
-                escudoUrl={ganadorEscudoUrl}
-                className="mt-3"
-                nombreClassName="text-base font-semibold text-text"
-              />
+              <div className="mt-3 flex items-center gap-3">
+                <EscudoParticipanteBox
+                  url={ganadorEscudoUrl}
+                  nombre={ganadorNombre}
+                  boxClassName="h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]"
+                />
+                <p className="min-w-0 flex-1 text-base font-semibold leading-snug text-text">
+                  {ganadorNombre}
+                </p>
+              </div>
               <p className="mt-1 text-2xl font-bold tabular-nums text-brand">
                 {formatPuntaje(puntaje ?? 0)}
               </p>
