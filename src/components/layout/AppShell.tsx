@@ -39,8 +39,8 @@ type NavGroup = {
 
 const topItem: NavItem = {
   href: "/",
-  label: "Inicio",
-  icon: <IconGauge className="h-4 w-4" />,
+  label: "Resultados",
+  icon: <IconTrophy className="h-4 w-4" />,
 };
 
 const adminNavGroups: NavGroup[] = [
@@ -49,7 +49,6 @@ const adminNavGroups: NavGroup[] = [
     items: [
       { href: "/admin", label: "Configuracion", icon: <IconClipboard className="h-4 w-4" /> },
       { href: "/jurado", label: "Calificar", icon: <IconStar className="h-4 w-4" /> },
-      { href: "/resultados", label: "Resultados", icon: <IconTrophy className="h-4 w-4" /> },
       { href: "/resultados/notas", label: "Notas de jurado", icon: <IconChart className="h-4 w-4" /> },
     ],
   },
@@ -146,7 +145,7 @@ function NavLink({
 }
 
 function pageTitle(pathname: string) {
-  if (pathname === "/") return "Inicio";
+  if (pathname === "/") return "Resultados";
   if (pathname.startsWith("/admin/participantes")) return "Participantes";
   if (pathname.startsWith("/admin/jurados")) return "Jurados";
   if (pathname.startsWith("/admin/usuarios")) return "Accesos";
