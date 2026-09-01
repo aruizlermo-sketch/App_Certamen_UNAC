@@ -1,4 +1,5 @@
 import { calcularPuntajeJurado } from "@/lib/certamen/aggregator";
+import { ParticipanteConEscudo } from "@/components/participantes/EscudoParticipante";
 import type { Calificacion, ConcursoCompleto } from "@/types/certamen";
 
 type NotasJuradosViewProps = {
@@ -101,7 +102,13 @@ export function NotasJuradosView({
                     <tbody>
                       {concurso.participantes.map((p) => (
                         <tr key={p.id} className="border-b border-border">
-                          <td className="px-3 py-2 font-medium">{p.nombre}</td>
+                          <td className="px-3 py-2 font-medium">
+                            <ParticipanteConEscudo
+                              nombre={p.nombre}
+                              escudoUrl={p.escudoUrl}
+                              size="sm"
+                            />
+                          </td>
                           {cat.jurados.map((j) => (
                             <td key={j.id} className="px-3 py-2 text-right">
                               {findScore(calificaciones, j.id, p.id, crit.id)}
@@ -143,7 +150,13 @@ export function NotasJuradosView({
                     key={`final-${p.id}`}
                     className="border-b border-brand/10 bg-brand-soft/10"
                   >
-                    <td className="px-3 py-2 font-semibold">{p.nombre}</td>
+                    <td className="px-3 py-2 font-semibold">
+                      <ParticipanteConEscudo
+                        nombre={p.nombre}
+                        escudoUrl={p.escudoUrl}
+                        size="sm"
+                      />
+                    </td>
                     {cat.jurados.map((j) => {
                       const result = calcularPuntajeJurado(
                         p.id,

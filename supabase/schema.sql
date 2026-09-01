@@ -62,6 +62,7 @@ create table if not exists participantes (
   id uuid primary key default gen_random_uuid(),
   concurso_id uuid not null references concursos (id) on delete cascade,
   nombre text not null,
+  escudo_url text,
   orden int not null default 0,
   created_at timestamptz not null default now()
 );

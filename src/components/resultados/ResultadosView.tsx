@@ -1,6 +1,6 @@
 import { IconStar, IconTrophy } from "@/components/icons/AppIcons";
+import { ParticipanteConEscudo } from "@/components/participantes/EscudoParticipante";
 import type { ResultadosConcurso } from "@/types/certamen";
-
 type ResultadosViewProps = {
   resultados: ResultadosConcurso;
   readOnly?: boolean;
@@ -35,6 +35,7 @@ function GanadorTotalCard({
   titulo,
   subtitulo,
   nombre,
+  escudoUrl,
   puntaje,
   accent,
   ring,
@@ -45,6 +46,7 @@ function GanadorTotalCard({
   titulo: string;
   subtitulo: string;
   nombre: string | null;
+  escudoUrl: string | null;
   puntaje: number | null;
   accent: string;
   ring: string;
@@ -79,7 +81,13 @@ function GanadorTotalCard({
           <p className="text-lg font-medium text-white/60">Por definir</p>
         ) : (
           <>
-            <p className="text-xl font-bold leading-snug sm:text-2xl">{nombre}</p>
+            <ParticipanteConEscudo
+              nombre={nombre}
+              escudoUrl={escudoUrl}
+              size="lg"
+              className="items-center"
+              nombreClassName="text-xl font-bold leading-snug sm:text-2xl"
+            />
             <div className="mt-4 flex flex-wrap items-end gap-3">
               <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${badge}`}>
                 Ganadora
@@ -98,10 +106,12 @@ function GanadorTotalCard({
 function PremioCategoriaCard({
   categoriaNombre,
   ganadorNombre,
+  ganadorEscudoUrl,
   puntaje,
 }: {
   categoriaNombre: string;
   ganadorNombre: string | null;
+  ganadorEscudoUrl: string | null;
   puntaje: number | null;
 }) {
   return (
@@ -118,9 +128,12 @@ function PremioCategoriaCard({
           <h3 className="mt-1 text-lg font-bold text-text">{categoriaNombre}</h3>
           {ganadorNombre ? (
             <>
-              <p className="mt-3 text-base font-semibold text-text">
-                {ganadorNombre}
-              </p>
+              <ParticipanteConEscudo
+                nombre={ganadorNombre}
+                escudoUrl={ganadorEscudoUrl}
+                className="mt-3"
+                nombreClassName="text-base font-semibold text-text"
+              />
               <p className="mt-1 text-2xl font-bold tabular-nums text-brand">
                 {formatPuntaje(puntaje ?? 0)}
               </p>
@@ -174,6 +187,7 @@ export function ResultadosView({ resultados, readOnly = false }: ResultadosViewP
                 titulo={podio.titulo}
                 subtitulo={podio.subtitulo}
                 nombre={entry?.participanteNombre ?? null}
+                escudoUrl={entry?.participanteEscudoUrl ?? null}
                 puntaje={entry?.puntajeTotal ?? null}
                 accent={podio.accent}
                 ring={podio.ring}
@@ -204,6 +218,7 @@ export function ResultadosView({ resultados, readOnly = false }: ResultadosViewP
                 key={rc.categoria.id}
                 categoriaNombre={rc.categoria.nombre}
                 ganadorNombre={rc.ganador?.participanteNombre ?? null}
+                ganadorEscudoUrl={rc.ganador?.participanteEscudoUrl ?? null}
                 puntaje={rc.ganador?.puntaje ?? null}
               />
             ))}

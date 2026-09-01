@@ -10,7 +10,7 @@ import {
   mockParticipantes,
 } from "@/lib/certamen/mock-data";
 import { fail, ok, type VoidResult } from "@/lib/result";
-import { normalizeEmail, requireEmail, requireNombre } from "@/lib/validators";
+import { normalizeEmail, requireEmail, requireEscudoUrl, requireNombre } from "@/lib/validators";
 
 function mapSupabaseError(message: string): string {
   if (message.includes("categorias_peso_total_check")) {
@@ -24,18 +24,22 @@ function mapSupabaseError(message: string): string {
 export async function createParticipante(input: {
   concursoId: string;
   nombre: string;
+  escudoUrl: string | null;
   orden: number;
 }): Promise<VoidResult> {
   const denied = await assertAdminSession();
   if (denied) return denied;
   const nombreError = requireNombre(input.nombre);
   if (nombreError) return nombreError;
+  const escudoError = requireEscudoUrl(input.escudoUrl);
+  if (escudoError) return escudoError;
 
   if (!isSupabaseConfigured()) {
     mockParticipantes.push({
       id: crypto.randomUUID(),
       concursoId: input.concursoId || MOCK_CONCURSO_ID,
       nombre: input.nombre,
+      escudoUrl: input.escudoUrl,
       orden: input.orden,
     });
     return ok();
@@ -45,6 +49,7 @@ export async function createParticipante(input: {
   const { error } = await supabase.from("participantes").insert({
     concurso_id: input.concursoId,
     nombre: input.nombre,
+    escudo_url: input.escudoUrl,
     orden: input.orden,
   });
 
@@ -53,17 +58,20 @@ export async function createParticipante(input: {
 
 export async function updateParticipante(
   id: string,
-  input: { nombre: string; orden: number },
+  input: { nombre: string; escudoUrl: string | null; orden: number },
 ): Promise<VoidResult> {
   const denied = await assertAdminSession();
   if (denied) return denied;
   const nombreError = requireNombre(input.nombre);
   if (nombreError) return nombreError;
+  const escudoError = requireEscudoUrl(input.escudoUrl);
+  if (escudoError) return escudoError;
 
   if (!isSupabaseConfigured()) {
     const item = mockParticipantes.find((p) => p.id === id);
     if (!item) return fail("Participante no encontrado.");
     item.nombre = input.nombre;
+    item.escudoUrl = input.escudoUrl;
     item.orden = input.orden;
     return ok();
   }
@@ -71,7 +79,11 @@ export async function updateParticipante(
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("participantes")
-    .update({ nombre: input.nombre, orden: input.orden })
+    .update({
+      nombre: input.nombre,
+      escudo_url: input.escudoUrl,
+      orden: input.orden,
+    })
     .eq("id", id);
 
   return error ? fail(error.message) : ok();

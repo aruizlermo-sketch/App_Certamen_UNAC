@@ -20,6 +20,11 @@ import {
 import { revalidateAdminPaths } from "@/lib/revalidate-paths";
 import type { VoidResult } from "@/lib/result";
 
+function parseEscudoUrl(formData: FormData): string | null {
+  const raw = String(formData.get("escudoUrl") ?? "").trim();
+  return raw || null;
+}
+
 async function runAdminMutation(
   fn: () => Promise<VoidResult>,
 ): Promise<VoidResult> {
@@ -35,6 +40,7 @@ export async function createParticipanteAction(
     createParticipante({
       concursoId: String(formData.get("concursoId") ?? ""),
       nombre: String(formData.get("nombre") ?? "").trim(),
+      escudoUrl: parseEscudoUrl(formData),
       orden: Number(formData.get("orden") ?? 0),
     }),
   );
@@ -46,6 +52,7 @@ export async function updateParticipanteAction(
   return runAdminMutation(() =>
     updateParticipante(String(formData.get("id") ?? ""), {
       nombre: String(formData.get("nombre") ?? "").trim(),
+      escudoUrl: parseEscudoUrl(formData),
       orden: Number(formData.get("orden") ?? 0),
     }),
   );

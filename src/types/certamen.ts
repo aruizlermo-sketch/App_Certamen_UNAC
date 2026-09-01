@@ -33,6 +33,7 @@ export type Participante = {
   id: string;
   concursoId: string;
   nombre: string;
+  escudoUrl: string | null;
   orden: number;
 };
 
@@ -68,6 +69,7 @@ export type ConcursoCompleto = Concurso & {
 export type PuntajeParticipanteCategoria = {
   participanteId: string;
   participanteNombre: string;
+  participanteEscudoUrl: string | null;
   puntaje: number;
   desglose: { criterioId: string; criterioNombre: string; promedio: number; peso: number; contribucion: number }[];
 };
@@ -81,6 +83,7 @@ export type RankingCategoria = {
 export type PuntajeTotalParticipante = {
   participanteId: string;
   participanteNombre: string;
+  participanteEscudoUrl: string | null;
   puntajeTotal: number;
   porCategoria: { categoriaId: string; categoriaNombre: string; puntaje: number; multiplicador: number; contribucion: number }[];
 };

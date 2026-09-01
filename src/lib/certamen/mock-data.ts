@@ -19,12 +19,12 @@ export const mockConcurso: Concurso = {
 };
 
 export const mockParticipantes: Participante[] = [
-  { id: "b0000001-0000-4000-8000-000000000001", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad de Ciencias Aplicadas", orden: 1 },
-  { id: "b0000001-0000-4000-8000-000000000002", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Inca Garcilazo de la Vega", orden: 2 },
-  { id: "b0000001-0000-4000-8000-000000000003", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Nacional Federico Villarreal", orden: 3 },
-  { id: "b0000001-0000-4000-8000-000000000004", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Cesar Vallejo", orden: 4 },
-  { id: "b0000001-0000-4000-8000-000000000005", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Nacional Agraria de la Molina", orden: 5 },
-  { id: "b0000001-0000-4000-8000-000000000006", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad San Ignacio de Loyola", orden: 6 },
+  { id: "b0000001-0000-4000-8000-000000000001", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad de Ciencias Aplicadas", escudoUrl: null, orden: 1 },
+  { id: "b0000001-0000-4000-8000-000000000002", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Inca Garcilazo de la Vega", escudoUrl: null, orden: 2 },
+  { id: "b0000001-0000-4000-8000-000000000003", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Nacional Federico Villarreal", escudoUrl: null, orden: 3 },
+  { id: "b0000001-0000-4000-8000-000000000004", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Cesar Vallejo", escudoUrl: null, orden: 4 },
+  { id: "b0000001-0000-4000-8000-000000000005", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad Nacional Agraria de la Molina", escudoUrl: null, orden: 5 },
+  { id: "b0000001-0000-4000-8000-000000000006", concursoId: MOCK_CONCURSO_ID, nombre: "Tuna Universidad San Ignacio de Loyola", escudoUrl: null, orden: 6 },
 ];
 
 export const mockJurados: Jurado[] = [

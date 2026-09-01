@@ -80,6 +80,7 @@ export function calcularPuntajeDesdeBorrador(
 export function calcularPuntajeCategoria(
   participanteId: string,
   participanteNombre: string,
+  participanteEscudoUrl: string | null,
   categoria: Categoria,
   criterios: CategoriaCriterio[],
   juradoIds: string[],
@@ -116,6 +117,7 @@ export function calcularPuntajeCategoria(
   return {
     participanteId,
     participanteNombre,
+    participanteEscudoUrl,
     puntaje,
     desglose,
   };
@@ -133,6 +135,7 @@ export function calcularRankingCategoria(
       calcularPuntajeCategoria(
         p.id,
         p.nombre,
+        p.escudoUrl,
         categoria,
         criterios,
         juradoIds,
@@ -163,6 +166,7 @@ export function calcularPuntajeTotal(
     const puntaje = calcularPuntajeCategoria(
       participante.id,
       participante.nombre,
+      participante.escudoUrl,
       cat,
       criterios,
       juradoIds,
@@ -185,6 +189,7 @@ export function calcularPuntajeTotal(
   return {
     participanteId: participante.id,
     participanteNombre: participante.nombre,
+    participanteEscudoUrl: participante.escudoUrl,
     puntajeTotal,
     porCategoria,
   };

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { loadCalificacionesAction } from "@/app/jurado/actions";
 import { ScoringForm } from "@/components/jurado/ScoringForm";
+import { ParticipanteConEscudo } from "@/components/participantes/EscudoParticipante";
 import type { Calificacion, ConcursoCompleto } from "@/types/certamen";
-
 type JuradoPageClientProps = {
   concurso: ConcursoCompleto;
   calificaciones: Calificacion[];
@@ -77,7 +77,11 @@ export function JuradoPageClient({
                 }}
                 className={choiceClass(participanteId === p.id)}
               >
-                {p.nombre}
+                <ParticipanteConEscudo
+                  nombre={p.nombre}
+                  escudoUrl={p.escudoUrl}
+                  size="sm"
+                />
               </button>
             ))}
           </div>

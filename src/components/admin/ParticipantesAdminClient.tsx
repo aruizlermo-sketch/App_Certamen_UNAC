@@ -7,6 +7,10 @@ import {
   deleteParticipanteAction,
   updateParticipanteAction,
 } from "@/app/admin/actions";
+import {
+  EscudoParticipante,
+  ParticipanteConEscudo,
+} from "@/components/participantes/EscudoParticipante";
 import type { Participante } from "@/types/certamen";
 
 type ParticipantesAdminClientProps = {
@@ -16,10 +20,11 @@ type ParticipantesAdminClientProps = {
 
 type FormState = {
   nombre: string;
+  escudoUrl: string;
   orden: string;
 };
 
-const emptyForm: FormState = { nombre: "", orden: "" };
+const emptyForm: FormState = { nombre: "", escudoUrl: "", orden: "" };
 
 export function ParticipantesAdminClient({
   concursoId,
@@ -39,7 +44,11 @@ export function ParticipantesAdminClient({
 
   function startEdit(p: Participante) {
     setEditingId(p.id);
-    setForm({ nombre: p.nombre, orden: String(p.orden) });
+    setForm({
+      nombre: p.nombre,
+      escudoUrl: p.escudoUrl ?? "",
+      orden: String(p.orden),
+    });
     setError(null);
   }
 
@@ -49,6 +58,7 @@ export function ParticipantesAdminClient({
 
     const fd = new FormData();
     fd.set("nombre", form.nombre);
+    fd.set("escudoUrl", form.escudoUrl);
     fd.set("orden", form.orden || "0");
 
     startTransition(async () => {
@@ -123,6 +133,29 @@ export function ParticipantesAdminClient({
             />
           </div>
         </div>
+        <div>
+          <label htmlFor="part-escudo" className="text-label">
+            Escudo universidad
+          </label>
+          <div className="mt-1.5 flex items-center gap-3">
+            <input
+              id="part-escudo"
+              value={form.escudoUrl}
+              onChange={(e) => setForm((f) => ({ ...f, escudoUrl: e.target.value }))}
+              className="input-field flex-1"
+              placeholder="/escudos/uca.png"
+            />
+            <EscudoParticipante
+              url={form.escudoUrl || null}
+              nombre={form.nombre || "Vista previa"}
+              size="lg"
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-text-muted">
+            Sube el PNG/JPG a <code className="text-unac-blue">public/escudos/</code> y
+            escribe la ruta, por ejemplo <code className="text-unac-blue">/escudos/uca.png</code>.
+          </p>
+        </div>
         {error ? (
           <p className="rounded-xl bg-coral-soft px-3 py-2 text-sm text-coral">
             {error}
@@ -158,7 +191,12 @@ export function ParticipantesAdminClient({
             {participantes.map((p) => (
               <tr key={p.id} className="border-b border-border">
                 <td className="px-4 py-3">{p.orden}</td>
-                <td className="px-4 py-3 font-medium">{p.nombre}</td>
+                <td className="px-4 py-3 font-medium">
+                  <ParticipanteConEscudo
+                    nombre={p.nombre}
+                    escudoUrl={p.escudoUrl}
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
                     <button

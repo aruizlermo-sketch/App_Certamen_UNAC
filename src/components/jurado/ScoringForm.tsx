@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { saveScoresAction } from "@/app/jurado/actions";
+import { ParticipanteConEscudo } from "@/components/participantes/EscudoParticipante";
 import { calcularPuntajeDesdeBorrador } from "@/lib/certamen/aggregator";
 import type {
   Calificacion,
@@ -152,7 +153,12 @@ export function ScoringForm({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-caption">Calificando</p>
-          <h2 className="text-xl font-bold">{participante.nombre}</h2>
+          <ParticipanteConEscudo
+            nombre={participante.nombre}
+            escudoUrl={participante.escudoUrl}
+            size="md"
+            nombreClassName="text-xl font-bold"
+          />
           <p className="mt-0.5 text-sm font-medium text-unac-blue">
             {categoria.nombre}
           </p>

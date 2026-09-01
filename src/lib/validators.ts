@@ -5,6 +5,20 @@ export function normalizeEmail(value: string | null | undefined): string | null 
   return email || null;
 }
 
+export function requireEscudoUrl(
+  value: string | null | undefined,
+): VoidResult | null {
+  const url = value?.trim() ?? "";
+  if (!url) return null;
+  if (!url.startsWith("/escudos/") || url.includes("..")) {
+    return {
+      ok: false,
+      error: "La ruta del escudo debe ser /escudos/nombre.png (dentro de public/escudos).",
+    };
+  }
+  return null;
+}
+
 export function requireNombre(
   value: string,
   label = "El nombre",

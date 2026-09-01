@@ -48,6 +48,7 @@ export function mapParticipante(row: DbRow): Participante {
     id: String(row.id),
     concursoId: String(row.concurso_id),
     nombre: String(row.nombre),
+    escudoUrl: row.escudo_url ? String(row.escudo_url) : null,
     orden: Number(row.orden),
   };
 }
