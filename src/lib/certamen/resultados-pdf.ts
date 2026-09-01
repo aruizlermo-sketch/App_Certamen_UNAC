@@ -11,10 +11,16 @@ function slugify(value: string) {
     .toLowerCase();
 }
 
+function formatPuntaje(value: number) {
+  return value.toFixed(3);
+}
+
 export function downloadResultadosPdf(resultados: ResultadosConcurso) {
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   const { concurso, rankingGeneral, porCategoria } = resultados;
+  const premiosIndividuales = porCategoria.filter((rc) => rc.categoria.tienePremio);
   const navy = [7, 41, 77] as [number, number, number];
+  const gold = [255, 198, 0] as [number, number, number];
   const fecha = new Date().toLocaleDateString("es-PE", {
     day: "2-digit",
     month: "long",
@@ -30,70 +36,93 @@ export function downloadResultadosPdf(resultados: ResultadosConcurso) {
   doc.setFontSize(10);
   doc.text(`Acta de resultados — ${fecha}`, 14, 29);
 
-  const categoriaHeaders = porCategoria.map((rc) =>
-    rc.categoria.nombre.replace(/^Mejor\s+/i, ""),
+  const primera = rankingGeneral[0];
+  const segunda = rankingGeneral[1];
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(10);
+  doc.text("Primera mejor tuna", 14, 38);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    primera
+      ? `${primera.participanteNombre} — ${formatPuntaje(primera.puntajeTotal)}`
+      : "Por definir",
+    14,
+    44,
   );
 
+  doc.setFont("helvetica", "bold");
+  doc.text("Segunda mejor tuna", 120, 38);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    segunda
+      ? `${segunda.participanteNombre} — ${formatPuntaje(segunda.puntajeTotal)}`
+      : "Por definir",
+    120,
+    44,
+  );
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Tabla general — Puntaje total", 14, 54);
+
   autoTable(doc, {
-    startY: 34,
-    head: [["N°", "Tuna", "Puntaje total", ...categoriaHeaders]],
+    startY: 58,
+    head: [["N°", "Tuna", "Puntaje total"]],
     body: rankingGeneral.map((r, index) => [
       String(index + 1),
       r.participanteNombre,
-      r.puntajeTotal.toFixed(3),
-      ...r.porCategoria.map((pc) => pc.puntaje.toFixed(3)),
+      formatPuntaje(r.puntajeTotal),
     ]),
     theme: "grid",
-    styles: { fontSize: 8, cellPadding: 2 },
+    styles: { fontSize: 9, cellPadding: 2.5 },
     headStyles: { fillColor: navy, textColor: 255, fontStyle: "bold" },
     columnStyles: {
-      0: { cellWidth: 10 },
-      2: { halign: "right" },
+      0: { cellWidth: 12 },
+      2: { halign: "right", cellWidth: 28 },
+    },
+    didParseCell(data) {
+      if (data.section === "body" && data.row.index === 0) {
+        data.cell.styles.fillColor = gold;
+        data.cell.styles.textColor = navy;
+        data.cell.styles.fontStyle = "bold";
+      }
+      if (data.section === "body" && data.row.index === 1) {
+        data.cell.styles.fillColor = [232, 240, 250];
+        data.cell.styles.fontStyle = "bold";
+      }
     },
   });
 
-  let cursorY = doc.lastAutoTable.finalY + 8;
+  let cursorY = doc.lastAutoTable.finalY + 10;
 
-  for (const rc of porCategoria) {
-    if (cursorY > 185) {
+  if (premiosIndividuales.length > 0) {
+    if (cursorY > 170) {
       doc.addPage();
       cursorY = 14;
     }
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text(rc.categoria.nombre, 14, cursorY);
-    cursorY += 5;
-
-    if (rc.ganador) {
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9);
-      doc.text(
-        `Ganador: ${rc.ganador.participanteNombre} (${rc.ganador.puntaje.toFixed(3)})`,
-        14,
-        cursorY,
-      );
-      cursorY += 5;
-    }
+    doc.text("Premios individuales por categoria", 14, cursorY);
+    cursorY += 6;
 
     autoTable(doc, {
       startY: cursorY,
-      head: [["N°", "Tuna", "Puntaje"]],
-      body: rc.ranking.map((r, index) => [
-        String(index + 1),
-        r.participanteNombre,
-        r.puntaje.toFixed(3),
+      head: [["Categoria", "Ganador/a", "Puntaje"]],
+      body: premiosIndividuales.map((rc) => [
+        rc.categoria.nombre,
+        rc.ganador?.participanteNombre ?? "Por definir",
+        rc.ganador ? formatPuntaje(rc.ganador.puntaje) : "—",
       ]),
       theme: "grid",
-      styles: { fontSize: 8, cellPadding: 2 },
+      styles: { fontSize: 9, cellPadding: 2.5 },
       headStyles: { fillColor: navy, textColor: 255, fontStyle: "bold" },
       columnStyles: {
-        0: { cellWidth: 10 },
-        2: { halign: "right" },
+        0: { cellWidth: 70 },
+        2: { halign: "right", cellWidth: 24 },
       },
     });
-
-    cursorY = doc.lastAutoTable.finalY + 8;
   }
 
   const filename = `resultados-${slugify(concurso.nombre) || "certamen"}.pdf`;
