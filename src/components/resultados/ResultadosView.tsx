@@ -107,7 +107,7 @@ export function ResultadosView({ resultados, readOnly = false }: ResultadosViewP
               ) : null}
             </div>
             <span className="status-pill bg-brand-soft text-text">
-              Suma de jurados
+              Mult. ×{rc.categoria.multiplicador}
             </span>
           </div>
 

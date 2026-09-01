@@ -60,7 +60,7 @@ export default async function AdminPage() {
             (40% / 30% / 30%)
           </li>
           <li>
-            Puntaje total: suma de puntajes por categoria
+            Puntaje total: suma de (puntaje categoria × multiplicador)
           </li>
         </ul>
       </div>

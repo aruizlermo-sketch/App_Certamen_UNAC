@@ -98,7 +98,7 @@ export async function createCategoriaAction(formData: FormData): Promise<VoidRes
       concursoId: String(formData.get("concursoId") ?? ""),
       nombre: String(formData.get("nombre") ?? "").trim(),
       descripcion: String(formData.get("descripcion") ?? "").trim() || null,
-      pesoTotal: Number(formData.get("pesoTotal") ?? 0.2),
+      multiplicador: Number(formData.get("multiplicador") ?? 1),
       orden: Number(formData.get("orden") ?? 0),
     }),
   );
@@ -109,7 +109,7 @@ export async function updateCategoriaAction(formData: FormData): Promise<VoidRes
     updateCategoria(String(formData.get("id") ?? ""), {
       nombre: String(formData.get("nombre") ?? "").trim(),
       descripcion: String(formData.get("descripcion") ?? "").trim() || null,
-      pesoTotal: Number(formData.get("pesoTotal") ?? 0.2),
+      multiplicador: Number(formData.get("multiplicador") ?? 1),
       orden: Number(formData.get("orden") ?? 0),
     }),
   );

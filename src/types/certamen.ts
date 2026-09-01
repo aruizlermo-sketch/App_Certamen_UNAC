@@ -15,7 +15,7 @@ export type Categoria = {
   concursoId: string;
   nombre: string;
   descripcion: string | null;
-  pesoTotal: number;
+  multiplicador: number;
   orden: number;
 };
 
@@ -81,7 +81,7 @@ export type PuntajeTotalParticipante = {
   participanteId: string;
   participanteNombre: string;
   puntajeTotal: number;
-  porCategoria: { categoriaId: string; categoriaNombre: string; puntaje: number; peso: number; contribucion: number }[];
+  porCategoria: { categoriaId: string; categoriaNombre: string; puntaje: number; multiplicador: number; contribucion: number }[];
 };
 
 export type ResultadosConcurso = {

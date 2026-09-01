@@ -26,7 +26,7 @@ export function mapCategoria(row: DbRow): Categoria {
     concursoId: String(row.concurso_id),
     nombre: String(row.nombre),
     descripcion: row.descripcion ? String(row.descripcion) : null,
-    pesoTotal: Number(row.peso_total),
+    multiplicador: Number(row.peso_total),
     orden: Number(row.orden),
   };
 }

@@ -309,7 +309,7 @@ export async function createCategoria(input: {
   concursoId: string;
   nombre: string;
   descripcion: string | null;
-  pesoTotal: number;
+  multiplicador: number;
   orden: number;
 }): Promise<VoidResult> {
   const denied = await assertAdminSession();
@@ -323,7 +323,7 @@ export async function createCategoria(input: {
       concursoId: input.concursoId || MOCK_CONCURSO_ID,
       nombre: input.nombre,
       descripcion: input.descripcion,
-      pesoTotal: input.pesoTotal,
+      multiplicador: input.multiplicador,
       orden: input.orden,
     });
     return ok();
@@ -334,7 +334,7 @@ export async function createCategoria(input: {
     concurso_id: input.concursoId,
     nombre: input.nombre,
     descripcion: input.descripcion,
-    peso_total: input.pesoTotal,
+    peso_total: input.multiplicador,
     orden: input.orden,
   });
 
@@ -346,7 +346,7 @@ export async function updateCategoria(
   input: {
     nombre: string;
     descripcion: string | null;
-    pesoTotal: number;
+    multiplicador: number;
     orden: number;
   },
 ): Promise<VoidResult> {
@@ -360,7 +360,7 @@ export async function updateCategoria(
     if (!item) return fail("Categoria no encontrada.");
     item.nombre = input.nombre;
     item.descripcion = input.descripcion;
-    item.pesoTotal = input.pesoTotal;
+    item.multiplicador = input.multiplicador;
     item.orden = input.orden;
     return ok();
   }
@@ -371,7 +371,7 @@ export async function updateCategoria(
     .update({
       nombre: input.nombre,
       descripcion: input.descripcion,
-      peso_total: input.pesoTotal,
+      peso_total: input.multiplicador,
       orden: input.orden,
     })
     .eq("id", id);

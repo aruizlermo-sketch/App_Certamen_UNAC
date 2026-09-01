@@ -41,7 +41,7 @@ create table if not exists categorias (
   concurso_id uuid not null references concursos (id) on delete cascade,
   nombre text not null,
   descripcion text,
-  peso_total numeric(5, 4) not null default 0.2 check (peso_total >= 0 and peso_total <= 1),
+  peso_total numeric(6, 3) not null default 1 check (peso_total >= 0),
   orden int not null default 0,
   created_at timestamptz not null default now()
 );
@@ -165,11 +165,11 @@ on conflict do nothing;
 
 -- Categorías
 insert into categorias (id, concurso_id, nombre, descripcion, peso_total, orden) values
-  ('d0000001-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'Mejor Instrumental', 'Evalúa la ejecución musical centrada en calidad y coordinación de instrumentos.', 0.2, 1),
-  ('d0000001-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Mejor Solista', 'Evalúa la actuación del solista vocal.', 0.2, 2),
-  ('d0000001-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000001', 'Mejor Pandereta', 'Evalúa el manejo de la pandereta.', 0.2, 3),
-  ('d0000001-0000-4000-8000-000000000004', 'a0000000-0000-4000-8000-000000000001', 'Mejor Bandera', 'Evalúa el manejo de la bandera.', 0.2, 4),
-  ('d0000001-0000-4000-8000-000000000005', 'a0000000-0000-4000-8000-000000000001', 'Mejor Capa', 'Evalúa la ejecución con capa.', 0.2, 5)
+  ('d0000001-0000-4000-8000-000000000001', 'a0000000-0000-4000-8000-000000000001', 'Mejor Instrumental', 'Evalúa la ejecución musical centrada en calidad y coordinación de instrumentos.', 1, 1),
+  ('d0000001-0000-4000-8000-000000000002', 'a0000000-0000-4000-8000-000000000001', 'Mejor Solista', 'Evalúa la actuación del solista vocal.', 1, 2),
+  ('d0000001-0000-4000-8000-000000000003', 'a0000000-0000-4000-8000-000000000001', 'Mejor Pandereta', 'Evalúa el manejo de la pandereta.', 1, 3),
+  ('d0000001-0000-4000-8000-000000000004', 'a0000000-0000-4000-8000-000000000001', 'Mejor Bandera', 'Evalúa el manejo de la bandera.', 1, 4),
+  ('d0000001-0000-4000-8000-000000000005', 'a0000000-0000-4000-8000-000000000001', 'Mejor Capa', 'Evalúa la ejecución con capa.', 1, 5)
 on conflict do nothing;
 
 -- Criterios por categoría

@@ -20,7 +20,7 @@ type CategoriasAdminClientProps = {
 type CategoriaForm = {
   nombre: string;
   descripcion: string;
-  pesoTotal: string;
+  multiplicador: string;
   orden: string;
 };
 
@@ -34,7 +34,7 @@ type CriterioForm = {
 const emptyCategoria: CategoriaForm = {
   nombre: "",
   descripcion: "",
-  pesoTotal: "0.2",
+  multiplicador: "1",
   orden: "",
 };
 
@@ -69,7 +69,7 @@ export function CategoriasAdminClient({
     setCatForm({
       nombre: cat.nombre,
       descripcion: cat.descripcion ?? "",
-      pesoTotal: String(cat.pesoTotal),
+      multiplicador: String(cat.multiplicador),
       orden: String(cat.orden),
     });
     setError(null);
@@ -108,7 +108,7 @@ export function CategoriasAdminClient({
     const fd = new FormData();
     fd.set("nombre", catForm.nombre);
     fd.set("descripcion", catForm.descripcion);
-    fd.set("pesoTotal", catForm.pesoTotal);
+    fd.set("multiplicador", catForm.multiplicador);
     fd.set("orden", catForm.orden || "0");
 
     startTransition(async () => {
@@ -204,14 +204,13 @@ export function CategoriasAdminClient({
             />
           </div>
           <div>
-            <label className="text-label">Peso total (0–1)</label>
+            <label className="text-label">Multiplicador</label>
             <input
               type="number"
-              step="0.01"
+              step="0.1"
               min="0"
-              max="1"
-              value={catForm.pesoTotal}
-              onChange={(e) => setCatForm((f) => ({ ...f, pesoTotal: e.target.value }))}
+              value={catForm.multiplicador}
+              onChange={(e) => setCatForm((f) => ({ ...f, multiplicador: e.target.value }))}
               className="input-field mt-1.5"
             />
           </div>
@@ -251,7 +250,7 @@ export function CategoriasAdminClient({
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="status-pill bg-brand-soft text-text">
-                  Peso: {(cat.pesoTotal * 100).toFixed(0)}%
+                  Mult. ×{cat.multiplicador}
                 </span>
                 <button
                   type="button"

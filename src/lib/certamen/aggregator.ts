@@ -173,13 +173,13 @@ export function calcularPuntajeTotal(
       categoriaId: cat.id,
       categoriaNombre: cat.nombre,
       puntaje,
-      peso: cat.pesoTotal,
-      contribucion: round2(puntaje),
+      multiplicador: cat.multiplicador,
+      contribucion: round2(puntaje * cat.multiplicador),
     };
   });
 
   const puntajeTotal = round2(
-    porCategoria.reduce((sum, c) => sum + c.puntaje, 0),
+    porCategoria.reduce((sum, c) => sum + c.contribucion, 0),
   );
 
   return {
