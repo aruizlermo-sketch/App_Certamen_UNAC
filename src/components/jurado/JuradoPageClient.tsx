@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { loadCalificacionesAction } from "@/app/jurado/actions";
 import { ScoringForm } from "@/components/jurado/ScoringForm";
-import { ParticipanteConEscudo } from "@/components/participantes/EscudoParticipante";
+import { ParticipanteTile } from "@/components/participantes/EscudoParticipante";
 import type { Calificacion, ConcursoCompleto } from "@/types/certamen";
 type JuradoPageClientProps = {
   concurso: ConcursoCompleto;
@@ -66,23 +66,19 @@ export function JuradoPageClient({
       <div className="card-panel space-y-6 p-5">
         <div>
           <p className="text-label">1. Tuna participante</p>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="mt-3 flex gap-3 overflow-x-auto pb-1 sm:grid sm:grid-cols-6 sm:overflow-visible">
             {concurso.participantes.map((p) => (
-              <button
+              <ParticipanteTile
                 key={p.id}
-                type="button"
+                nombre={p.nombre}
+                escudoUrl={p.escudoUrl}
+                orden={p.orden}
+                active={participanteId === p.id}
                 onClick={() => {
                   setParticipanteId(p.id);
                   setCategoriaId("");
                 }}
-                className={choiceClass(participanteId === p.id)}
-              >
-                <ParticipanteConEscudo
-                  nombre={p.nombre}
-                  escudoUrl={p.escudoUrl}
-                  size="sm"
-                />
-              </button>
+              />
             ))}
           </div>
         </div>
