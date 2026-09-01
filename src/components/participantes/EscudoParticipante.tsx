@@ -76,23 +76,30 @@ export function ParticipanteTile({
   return (
     <button
       type="button"
+      title={nombre}
+      aria-label={nombre}
       onClick={onClick}
-      className={`flex aspect-square w-[6.75rem] shrink-0 flex-col items-center justify-center gap-2 rounded-xl border p-2 text-center transition sm:w-28 ${
+      className={`aspect-square w-24 shrink-0 rounded-xl border p-3 transition sm:w-32 ${
         active
-          ? "border-unac-blue bg-blue-soft font-semibold text-unac-blue shadow-[0_0_0_2px_rgb(39_108_170_/_0.15)]"
-          : "border-border bg-card text-text hover:border-unac-blue hover:bg-blue-soft"
+          ? "border-unac-blue bg-blue-soft shadow-[0_0_0_2px_rgb(39_108_170_/_0.15)]"
+          : "border-border bg-card hover:border-unac-blue hover:bg-blue-soft"
       }`}
     >
       {escudoUrl ? (
-        <EscudoParticipante url={escudoUrl} nombre={nombre} size="xl" />
+        <span className="relative block h-full w-full">
+          <Image
+            src={escudoUrl}
+            alt={`Escudo ${nombre}`}
+            fill
+            sizes="128px"
+            className="object-contain"
+          />
+        </span>
       ) : (
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-page-bg text-sm font-bold text-text-muted">
+        <span className="flex h-full w-full items-center justify-center rounded-lg bg-page-bg text-2xl font-bold text-text-muted">
           {orden}
         </span>
       )}
-      <span className="line-clamp-3 text-[10px] font-semibold leading-tight sm:text-[11px]">
-        {nombre}
-      </span>
     </button>
   );
 }
