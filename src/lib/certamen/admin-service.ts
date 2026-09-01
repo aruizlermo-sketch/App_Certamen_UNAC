@@ -12,6 +12,13 @@ import {
 import { fail, ok, type VoidResult } from "@/lib/result";
 import { normalizeEmail, requireEmail, requireNombre } from "@/lib/validators";
 
+function mapSupabaseError(message: string): string {
+  if (message.includes("categorias_peso_total_check")) {
+    return "Multiplicador no permitido por la base de datos. Ejecuta el script categoria-multiplicadores.sql en Supabase (permite valores como 3).";
+  }
+  return message;
+}
+
 // --- Participantes ---
 
 export async function createParticipante(input: {
@@ -338,7 +345,7 @@ export async function createCategoria(input: {
     orden: input.orden,
   });
 
-  return error ? fail(error.message) : ok();
+  return error ? fail(mapSupabaseError(error.message)) : ok();
 }
 
 export async function updateCategoria(
@@ -376,7 +383,7 @@ export async function updateCategoria(
     })
     .eq("id", id);
 
-  return error ? fail(error.message) : ok();
+  return error ? fail(mapSupabaseError(error.message)) : ok();
 }
 
 export async function deleteCategoria(id: string): Promise<VoidResult> {
