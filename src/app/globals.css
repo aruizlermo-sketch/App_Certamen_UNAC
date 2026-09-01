@@ -163,9 +163,10 @@ body {
 
   .btn-score-active {
     border-color: var(--unac-gold);
-    background-color: var(--unac-gold-soft);
+    background-color: var(--unac-gold);
     color: var(--unac-navy-dark);
-    box-shadow: 0 0 0 2px rgb(255 198 0 / 0.3);
+    font-weight: 700;
+    box-shadow: 0 0 0 2px rgb(255 198 0 / 0.35);
   }
 
   .card-panel {
