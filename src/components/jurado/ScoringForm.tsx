@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { saveScoresAction } from "@/app/jurado/actions";
+import { IconLock } from "@/components/icons/AppIcons";
 import { ParticipanteConEscudo } from "@/components/participantes/EscudoParticipante";
 import { calcularPuntajeDesdeBorrador } from "@/lib/certamen/aggregator";
 import type {
@@ -19,6 +20,8 @@ type ScoringFormProps = {
   participante: Participante;
   juradoId: string;
   calificaciones: Calificacion[];
+  readOnly?: boolean;
+  adminOverride?: boolean;
   onSaved?: () => void;
 };
 
@@ -67,6 +70,8 @@ export function ScoringForm({
   participante,
   juradoId,
   calificaciones,
+  readOnly = false,
+  adminOverride = false,
   onSaved,
 }: ScoringFormProps) {
   const router = useRouter();
@@ -109,11 +114,13 @@ export function ScoringForm({
   const hasSelection = criteriosCompletados > 0;
 
   function handleSelectScore(criterioId: string, value: string) {
+    if (readOnly) return;
     setDraftScores((prev) => ({ ...prev, [criterioId]: value }));
     setFeedback(null);
   }
 
   function handleSaveAll() {
+    if (readOnly) return;
     const scores = categoria.criterios
       .filter((crit) => draftScores[crit.id])
       .map((crit) => ({
@@ -182,6 +189,22 @@ export function ScoringForm({
         </div>
       </div>
 
+      {readOnly ? (
+        <div className="flex items-start gap-2 rounded-lg border border-border bg-page-bg px-4 py-3 text-sm text-text">
+          <IconLock className="mt-0.5 h-4 w-4 shrink-0 text-text-muted" />
+          <p>
+            Evaluacion cerrada. Las notas de esta tuna ya no se pueden modificar.
+          </p>
+        </div>
+      ) : null}
+
+      {adminOverride ? (
+        <div className="rounded-lg border border-amber-soft bg-amber-soft px-4 py-3 text-sm text-amber-900">
+          Esta tuna esta cerrada para el jurado. Puedes corregir las notas como
+          administrador.
+        </div>
+      ) : null}
+
       <div className="space-y-3">
         {categoria.criterios.map((crit) => {
           const current = draftScores[crit.id] ?? "";
@@ -213,7 +236,7 @@ export function ScoringForm({
                         key={opt}
                         type="button"
                         onClick={() => handleSelectScore(crit.id, opt)}
-                        disabled={pending}
+                        disabled={pending || readOnly}
                         className={
                           current === opt
                             ? "btn-score btn-score-active"
@@ -262,18 +285,22 @@ export function ScoringForm({
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
         <p className="text-sm text-text-muted">
-          {hasSelection
-            ? "Revisa las notas y pulsa Guardar para confirmar."
-            : "Selecciona las notas de cada criterio."}
+          {readOnly
+            ? "Las notas quedaron registradas y no se pueden cambiar."
+            : hasSelection
+              ? "Revisa las notas y pulsa Guardar para confirmar."
+              : "Selecciona las notas de cada criterio."}
         </p>
-        <button
-          type="button"
-          onClick={handleSaveAll}
-          disabled={pending || !hasSelection}
-          className="btn-primary min-w-[140px]"
-        >
-          {pending ? "Guardando..." : "Guardar"}
-        </button>
+        {readOnly ? null : (
+          <button
+            type="button"
+            onClick={handleSaveAll}
+            disabled={pending || !hasSelection}
+            className="btn-primary min-w-[140px]"
+          >
+            {pending ? "Guardando..." : "Guardar"}
+          </button>
+        )}
       </div>
     </div>
   );

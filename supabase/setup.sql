@@ -3,7 +3,8 @@
 --   1) schema.sql
 --   2) policies.sql
 --
--- Instalaciones antiguas que ya corrieron roles-rls.sql, link-by-email.sql
--- o presidente-jurado.sql: ejecutar solo policies.sql (es idempotente).
+-- Instalaciones antiguas: ejecutar el script de migracion que falte
+-- (categoria-tiene-premio.sql, categoria-multiplicadores.sql,
+-- participante-evaluacion-cerrada.sql, etc.) y luego policies.sql.
 
 \echo 'Ejecuta schema.sql y luego policies.sql desde el SQL Editor de Supabase.'

@@ -50,6 +50,7 @@ export function mapParticipante(row: DbRow): Participante {
     nombre: String(row.nombre),
     escudoUrl: row.escudo_url ? String(row.escudo_url) : null,
     orden: Number(row.orden),
+    evaluacionCerrada: Boolean(row.evaluacion_cerrada),
   };
 }
 

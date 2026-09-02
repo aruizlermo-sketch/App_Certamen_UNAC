@@ -41,6 +41,7 @@ export async function createParticipante(input: {
       nombre: input.nombre,
       escudoUrl: input.escudoUrl,
       orden: input.orden,
+      evaluacionCerrada: false,
     });
     return ok();
   }
@@ -87,6 +88,49 @@ export async function updateParticipante(
     .eq("id", id);
 
   return error ? fail(error.message) : ok();
+}
+
+export async function setParticipanteEvaluacionCerrada(
+  id: string,
+  evaluacionCerrada: boolean,
+): Promise<VoidResult> {
+  const denied = await assertAdminSession();
+  if (denied) return denied;
+
+  if (!isSupabaseConfigured()) {
+    const item = mockParticipantes.find((p) => p.id === id);
+    if (!item) return fail("Participante no encontrado.");
+    item.evaluacionCerrada = evaluacionCerrada;
+    return ok();
+  }
+
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("participantes")
+    .update({ evaluacion_cerrada: evaluacionCerrada })
+    .eq("id", id)
+    .select("id, evaluacion_cerrada")
+    .maybeSingle();
+
+  if (error) {
+    const missingColumn =
+      error.message.includes("evaluacion_cerrada") ||
+      error.code === "PGRST204";
+    if (missingColumn) {
+      return fail(
+        "Falta la columna en la base de datos. Ejecuta supabase/participante-evaluacion-cerrada.sql en el SQL Editor de Supabase.",
+      );
+    }
+    return fail(error.message);
+  }
+
+  if (!data || Boolean(data.evaluacion_cerrada) !== evaluacionCerrada) {
+    return fail(
+      "No se pudo guardar el cierre de evaluacion. Ejecuta supabase/participante-evaluacion-cerrada.sql en el SQL Editor de Supabase.",
+    );
+  }
+
+  return ok();
 }
 
 export async function deleteParticipante(id: string): Promise<VoidResult> {

@@ -64,6 +64,7 @@ create table if not exists participantes (
   nombre text not null,
   escudo_url text,
   orden int not null default 0,
+  evaluacion_cerrada boolean not null default false,
   created_at timestamptz not null default now()
 );
 

@@ -11,6 +11,7 @@ type JuradoPageClientProps = {
   juradoId: string;
   juradoNombre: string;
   demoMode?: boolean;
+  allowLockedEdit?: boolean;
 };
 
 function choiceClass(active: boolean) {
@@ -23,6 +24,7 @@ export function JuradoPageClient({
   juradoId,
   juradoNombre,
   demoMode = false,
+  allowLockedEdit = false,
 }: JuradoPageClientProps) {
   const categoriasAsignadas = concurso.categorias.filter((cat) =>
     cat.jurados.some((j) => j.id === juradoId),
@@ -74,6 +76,7 @@ export function JuradoPageClient({
                 escudoUrl={p.escudoUrl}
                 orden={p.orden}
                 active={participanteId === p.id}
+                locked={p.evaluacionCerrada}
                 onClick={() => {
                   setParticipanteId(p.id);
                   setCategoriaId("");
@@ -115,6 +118,8 @@ export function JuradoPageClient({
             participante={participante}
             juradoId={juradoId}
             calificaciones={calificaciones}
+            readOnly={participante.evaluacionCerrada && !allowLockedEdit}
+            adminOverride={participante.evaluacionCerrada && allowLockedEdit}
             onSaved={() => {
               if (demoMode) {
                 loadCalificacionesAction(juradoId).then(setCalificaciones);

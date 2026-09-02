@@ -5,6 +5,7 @@ import { getAppSession } from "@/lib/auth/session";
 import { canViewResultados, canViewAllCalificaciones } from "@/lib/auth/guards";
 import {
   assertJuradoOwnsCategory,
+  assertParticipanteCalificable,
   filterCalificacionesForSession,
   resolveJuradoIdForSave,
 } from "@/lib/auth/permissions";
@@ -222,6 +223,15 @@ export async function saveCalificacion(input: {
     return fail("Concurso no encontrado.");
   }
 
+  const lockCheck = assertParticipanteCalificable(
+    concurso,
+    input.participanteId,
+    session,
+  );
+  if (!lockCheck.ok) {
+    return lockCheck;
+  }
+
   const categoryCheck = assertJuradoOwnsCategory(
     concurso,
     juradoId,
@@ -297,6 +307,15 @@ export async function saveCalificaciones(input: {
   const concurso = await getConcursoCompleto();
   if (!concurso) {
     return fail("Concurso no encontrado.");
+  }
+
+  const lockCheck = assertParticipanteCalificable(
+    concurso,
+    input.participanteId,
+    session,
+  );
+  if (!lockCheck.ok) {
+    return lockCheck;
   }
 
   for (const score of input.scores) {

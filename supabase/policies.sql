@@ -70,6 +70,20 @@ as $$
   );
 $$;
 
+create or replace function public.participante_evaluacion_abierta(p_participante_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from participantes
+    where id = p_participante_id
+      and evaluacion_cerrada = false
+  );
+$$;
+
 -- ============================================================
 -- Vinculacion de cuentas por email
 -- ============================================================
@@ -268,6 +282,7 @@ create policy "calificaciones_jurado_insert_own" on calificaciones
     or (
       jurado_id in (select my_jurado_ids())
       and categoria_criterio_id in (select my_assigned_criterio_ids())
+      and participante_evaluacion_abierta(participante_id)
     )
   );
 
@@ -283,6 +298,7 @@ create policy "calificaciones_jurado_update_own" on calificaciones
     or (
       jurado_id in (select my_jurado_ids())
       and categoria_criterio_id in (select my_assigned_criterio_ids())
+      and participante_evaluacion_abierta(participante_id)
     )
   );
 

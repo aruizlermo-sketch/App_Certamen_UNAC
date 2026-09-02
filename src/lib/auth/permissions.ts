@@ -1,6 +1,6 @@
 import type { AppSession } from "@/types/auth";
 import type { ConcursoCompleto } from "@/types/certamen";
-import type { VoidResult } from "@/lib/result";
+import { fail, type VoidResult } from "@/lib/result";
 import { canViewAllCalificaciones, type CalificacionesScope } from "@/lib/auth/guards";
 
 export function resolveJuradoIdForSave(
@@ -16,6 +16,29 @@ export function resolveJuradoIdForSave(
   }
 
   return session.juradoId;
+}
+
+export function canOverrideEvaluacionCerrada(session: AppSession): boolean {
+  return session.rol === "admin" && !session.isDemo;
+}
+
+export function assertParticipanteCalificable(
+  concurso: ConcursoCompleto,
+  participanteId: string,
+  session: AppSession,
+): VoidResult | { ok: true } {
+  const participante = concurso.participantes.find((p) => p.id === participanteId);
+  if (!participante) {
+    return fail("Participante no encontrado.");
+  }
+
+  if (participante.evaluacionCerrada && !canOverrideEvaluacionCerrada(session)) {
+    return fail(
+      "La evaluacion de esta tuna esta cerrada. No se pueden modificar las notas.",
+    );
+  }
+
+  return { ok: true };
 }
 
 export function assertJuradoOwnsCategory(

@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import {
   createParticipanteAction,
   deleteParticipanteAction,
+  setParticipanteEvaluacionCerradaAction,
   updateParticipanteAction,
 } from "@/app/admin/actions";
 import {
@@ -99,6 +100,21 @@ export function ParticipantesAdminClient({
     });
   }
 
+  function handleToggleCerrada(id: string, evaluacionCerrada: boolean) {
+    setError(null);
+    startTransition(async () => {
+      const result = await setParticipanteEvaluacionCerradaAction(
+        id,
+        evaluacionCerrada,
+      );
+      if (result.ok) {
+        router.refresh();
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="card-panel space-y-4 p-5">
@@ -184,6 +200,7 @@ export function ParticipantesAdminClient({
             <tr className="border-b border-border bg-page-bg">
               <th className="px-4 py-3 text-left">N°</th>
               <th className="px-4 py-3 text-left">Tuna</th>
+              <th className="px-4 py-3 text-left">Cerrar notas</th>
               <th className="px-4 py-3 text-right">Acciones</th>
             </tr>
           </thead>
@@ -196,6 +213,28 @@ export function ParticipantesAdminClient({
                     nombre={p.nombre}
                     escudoUrl={p.escudoUrl}
                   />
+                </td>
+                <td className="px-4 py-3">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={p.evaluacionCerrada}
+                      onChange={(e) =>
+                        handleToggleCerrada(p.id, e.target.checked)
+                      }
+                      disabled={pending}
+                      className="h-4 w-4 rounded border-border text-brand focus:ring-brand"
+                    />
+                    <span
+                      className={`status-pill ${
+                        p.evaluacionCerrada
+                          ? "bg-coral-soft text-coral"
+                          : "bg-green-soft text-green"
+                      }`}
+                    >
+                      {p.evaluacionCerrada ? "Cerrada" : "Abierta"}
+                    </span>
+                  </label>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">

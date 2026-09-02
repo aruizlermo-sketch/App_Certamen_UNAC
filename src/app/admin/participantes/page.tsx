@@ -13,6 +13,10 @@ export default async function ParticipantesAdminPage() {
       <div>
         <p className="section-eyebrow">Configuracion</p>
         <h2 className="section-title">Participantes</h2>
+        <p className="mt-1 text-sm text-text-muted">
+          Marca Cerrar notas cuando una tuna ya actuo, para que jurado y presidente
+          no puedan cambiar sus calificaciones.
+        </p>
       </div>
 
       <ParticipantesAdminClient

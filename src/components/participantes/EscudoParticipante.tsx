@@ -92,6 +92,7 @@ type ParticipanteTileProps = {
   escudoUrl?: string | null;
   orden: number;
   active?: boolean;
+  locked?: boolean;
   onClick: () => void;
 };
 
@@ -100,15 +101,16 @@ export function ParticipanteTile({
   escudoUrl,
   orden,
   active = false,
+  locked = false,
   onClick,
 }: ParticipanteTileProps) {
   return (
     <button
       type="button"
-      title={nombre}
-      aria-label={nombre}
+      title={locked ? `${nombre} (evaluacion cerrada)` : nombre}
+      aria-label={locked ? `${nombre}, evaluacion cerrada` : nombre}
       onClick={onClick}
-      className={`aspect-square w-24 shrink-0 rounded-xl border p-3 transition sm:w-32 ${
+      className={`relative aspect-square w-24 shrink-0 rounded-xl border p-3 transition sm:w-32 ${
         active
           ? "border-unac-blue bg-blue-soft shadow-[0_0_0_2px_rgb(39_108_170_/_0.15)]"
           : "border-border bg-card hover:border-unac-blue hover:bg-blue-soft"
@@ -129,6 +131,11 @@ export function ParticipanteTile({
           {orden}
         </span>
       )}
+      {locked ? (
+        <span className="absolute right-1.5 top-1.5 rounded-md bg-page-bg/90 px-1 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-text-muted ring-1 ring-border">
+          Cerrada
+        </span>
+      ) : null}
     </button>
   );
 }

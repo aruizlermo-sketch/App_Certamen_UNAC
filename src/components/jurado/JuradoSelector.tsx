@@ -71,6 +71,7 @@ export function JuradoSelector({
           juradoId={jurado.id}
           juradoNombre={jurado.nombre}
           demoMode={demoMode}
+          allowLockedEdit={adminMode}
         />
       ) : null}
     </div>

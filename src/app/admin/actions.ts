@@ -15,6 +15,7 @@ import {
   updateCategoria,
   updateCriterio,
   updateJurado,
+  setParticipanteEvaluacionCerrada,
   updateParticipante,
 } from "@/lib/certamen/admin-service";
 import { revalidateAdminPaths } from "@/lib/revalidate-paths";
@@ -60,6 +61,15 @@ export async function updateParticipanteAction(
 
 export async function deleteParticipanteAction(id: string): Promise<VoidResult> {
   return runAdminMutation(() => deleteParticipante(id));
+}
+
+export async function setParticipanteEvaluacionCerradaAction(
+  id: string,
+  evaluacionCerrada: boolean,
+): Promise<VoidResult> {
+  return runAdminMutation(() =>
+    setParticipanteEvaluacionCerrada(id, evaluacionCerrada),
+  );
 }
 
 export async function createJuradoAction(formData: FormData): Promise<VoidResult> {

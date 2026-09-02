@@ -35,6 +35,7 @@ export type Participante = {
   nombre: string;
   escudoUrl: string | null;
   orden: number;
+  evaluacionCerrada: boolean;
 };
 
 export type Jurado = {
